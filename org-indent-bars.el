@@ -153,13 +153,99 @@ foreground colors of the 8 faces in `org-level-faces'.
                       "\"3 c #942563507310\","
                       "\"0 c None\",")))))
 
-;;; font lock stuff for heading line, org-get-level-face
+
+;;; font lock stuff for heading lines, org-get-level-face
+
+(defface org-indent-bars-star-empty nil
+  "If non trivial, this is the face used for the heading star
+when corresponding subtree is empty.  If trivial, faces in
+`org-level-faces' will be used.
+
+See `face-nontrivial-p' and `org-indent-bars-subtree-is-empty-p'.")
+
+(defface org-indent-bars-star-invisible nil
+  "If non trivial, this is the face used for the heading star
+when corresponding subtree is not empty and invisible.  If trivial,
+faces in `org-level-faces' will be used.
+
+See `face-nontrivial-p', `org-indent-bars-subtree-is-empty-p' and
+`org-indent-bars-subtree-is-invisible-p'.")
+
+(defface org-indent-bars-star-visible nil
+  "If non trivial, this is the face used for the heading star
+when corresponding subtree is not visible.  If trivial, faces
+in `org-level-faces' will be used.
+
+See `face-nontrivial-p', `org-indent-bars-subtree-is-empty-p' and
+`org-indent-bars-subtree-is-invisible-p'.")
+
+(defvar org-indent-bars-stars
+  '(:empty "* "
+    :invisible "+ "
+    :visible "- ")
+  "Plist of the strings used in place of the star \"* \" in heading lines.
+The replacement star is choosen accordingly to the state of the subtree:
+:empty
+    if the subtree is empty (see `org-indent-bars-subtree-is-empty-p'),
+:invisible
+    if the subtree is not empty and invisible
+    (see `org-indent-bars-subtree-is-invisible-p'),
+:visible
+    if the subtree is not empty and visible.")
+
+(defun org-indent-bars-subtree-is-empty-p ()
+  "Return t if subtree at point is empty."
+  (save-match-data
+    (save-excursion
+      (let* ((heading-end (progn (outline-back-to-heading)
+                                 (outline-end-of-heading)
+                                 (point)))
+             (subtree-end (progn (outline-end-of-subtree)
+                                 (point))))
+        (= subtree-end heading-end)))))
+
+(defun org-indent-bars-subtree-is-invisible-p ()
+  "Return t if subtree at point is invisible."
+  (save-match-data (org-invisible-p (point-at-eol))))
+
+(defun org-indent-bars-star ()
+  "Return plist of the string and face of the star to use on heading at point.
+The plist has the keywords: :star and :face.
+
+The string and face to use depend on the state of the subtree: empty,
+invisible or visible.
+
+You can customize the stars with the variable `org-indent-bars-stars'."
+  (let (star face)
+    (cond ((org-indent-bars-subtree-is-empty-p)
+           (setq star (plist-get org-indent-bars-stars :empty))
+           (setq face 'org-indent-bars-star-empty))
+          ((org-indent-bars-subtree-is-invisible-p)
+           (setq star (plist-get org-indent-bars-stars :invisible))
+           (setq face 'org-indent-bars-star-invisible))
+          (t
+           (setq star (plist-get org-indent-bars-stars :visible))
+           (setq face 'org-indent-bars-star-visible)))
+    `(:star ,star :face ,face)))
 
 (defun org-indent-bars-get-level-face (n)
   "Get the right face for match N in font-lock matching of headlines.
 
 This function is meant to override `org-get-level-face' with an advice."
-  (let* ((org-l0 (- (match-end 2) (match-beginning 1) 1))
+  ;; The font-lock matching of heading lines appears in the function
+  ;; `org-set-font-lock-defaults' like this:
+  ;;
+  ;; `(,(if org-fontify-whole-heading-line
+  ;;        "^\\(\\**\\)\\(\\* \\)\\(.*\n?\\)"
+  ;;      "^\\(\\**\\)\\(\\* \\)\\(.*\\)")
+  ;;   (1 (org-get-level-face 1))
+  ;;   (2 (org-get-level-face 2))
+  ;;   (3 (org-get-level-face 3)))
+  ;;
+  (let* ((beg-2 (match-beginning 2))
+         (end-2 (match-end 2))
+         (beg-1 (match-beginning 1))
+         (org-l0 (- end-2 beg-1 1))
          (org-l (if org-odd-levels-only (1+ (/ org-l0 2)) org-l0))
          (org-f (if org-cycle-level-faces
                     (nth (% (1- org-l) org-n-level-faces) org-level-faces)
@@ -173,10 +259,30 @@ This function is meant to override `org-get-level-face' with an advice."
           (add-text-properties
            beg-1 (- end-2 2) '(invisible org-indent-bars-invisible)))
       'default)
-
-     ((eq n 2) org-f)
+     ((eq n 2)
+      (let* ((star (org-indent-bars-star))
+             (star-s (plist-get star :star))
+             (star-f (plist-get star :face)))
+        (add-text-properties beg-2 end-2 `(display ,star-s))
+        (if (face-nontrivial-p star-f) star-f org-f)))
      (t (unless org-level-color-stars-only org-f)))))
 
+;;;; tests
+
+(comment ; for manual testing
+ (custom-set-faces
+  '(org-indent-bars-star-empty ((t (:foreground "#00ff00"))))
+  '(org-indent-bars-star-invisible ((t (:foreground "#ff0000"))))
+  '(org-indent-bars-star-visible ((t (:foreground "#0000ff")))))
+
+ (custom-set-faces
+  '(org-indent-bars-star-empty ((t nil)))
+  '(org-indent-bars-star-invisible ((t nil)))
+  '(org-indent-bars-star-visible ((t nil))))
+
+ (setq org-level-color-stars-only t)
+ (setq org-level-color-stars-only nil)
+ )
 
 ;;; fix headings
 
