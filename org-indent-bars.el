@@ -185,6 +185,8 @@ with an advice."
         (make-vector org-indent--deepest-level nil))
   (setq org-indent--text-line-prefixes
         (make-vector org-indent--deepest-level nil))
+  ;; END:
+  ;; -------
   (dotimes (n org-indent--deepest-level)
     (let ((indentation (if (<= n 1) 0
                          (* (1- org-indent-indentation-per-level)
@@ -193,7 +195,12 @@ with an advice."
       (let ((heading-prefix (make-string indentation ?*)))
         (aset org-indent--heading-line-prefixes
               n
-              (org-add-props heading-prefix nil 'face 'org-indent))
+              (if (<= n 1)
+                  ""
+                (propertize " " 'display (org-indent-bars-xpm-image (1- n)))))
+
+        ;; -------
+        ;; BEG: part unchanged from `org-indent--compute-prefixes'
         ;; Inline tasks line prefixes
         (aset org-indent--inlinetask-line-prefixes
               n
@@ -201,9 +208,10 @@ with an advice."
                     ((bound-and-true-p org-inlinetask-show-first-star)
                      (concat org-indent-inlinetask-first-star
                              (substring heading-prefix 1)))
-                    (t (org-add-props heading-prefix nil 'face 'org-indent)))))
-      ;; END:
-      ;; -------
+                    (t (org-add-props heading-prefix nil 'face 'org-indent))))
+        ;; END:
+        ;; -------
+        )
 
       ;; Text line prefixes.
       (aset org-indent--text-line-prefixes
