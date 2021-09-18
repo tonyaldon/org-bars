@@ -11,7 +11,8 @@ LEVEL must be strickly superior to 0."
   (let* ((identifier "/* XPM */\nstatic char *rule[] = {")
          (width 9) ; 9 calculated on my device with fill-column-indicator package
          (height 18) ; 18 calculated on my device with fill-column-indicator package
-         (width-str (number-to-string (* level width)))
+         (indentation org-indent-indentation-per-level)
+         (width-str (number-to-string (+ (* (1- indentation) width) (* level width))))
          (heigth-str (number-to-string height))
          (character-per-pixel "1")
          (colors "9") ; 8 org face levels + None color
@@ -23,7 +24,7 @@ LEVEL must be strickly superior to 0."
                               org-n-level-faces)
                          (mod level org-n-level-faces))
                      width))
-         (pixel-line (org-indent-bars-pixel-line level width))
+         (pixel-line (org-indent-bars-pixel-line level width indentation))
          (raster (-reduce #'concat (-repeat height pixel-line)))
          (end "};")
          (data (concat identifier dimensions color-spec raster end)))
@@ -32,16 +33,22 @@ LEVEL must be strickly superior to 0."
             :mask heuristic
             :ascent center)))
 
-(defun org-indent-bars-pixel-line (level width)
-  "Return the pixels line for level LEVEL with WIDTH being the width character.
+(defun org-indent-bars-pixel-line (level width indentation)
+  "Return the pixels line for level LEVEL with WIDTH being the character's width.
+
+ (* WIDTH (- INDENTATION 1)) corresponds to the number of None pixels we add
+after each level bar.  In practice, `org-indent-bars-pixel-line' is called
+with INDENTATION argument value equal to `org-indent-indentation-per-level'.
 
 `org-indent-bars-pixel-line' is used to construct the XPM image
 used as `line-prefix' text property for each line for the level
 LEVEL in the org tree."
-  (concat "\""
-          (-reduce #'concat (--map (org-indent-bars-pixel-bar it width)
-                                   (number-sequence 1 level)))
-          "\","))
+  (let ((none-pixels (s-repeat (* (1- indentation) width) "0")))
+    (concat "\""
+            (s-join none-pixels (--map (org-indent-bars-pixel-bar it width)
+                                       (number-sequence 1 level)))
+            none-pixels
+            "\",")))
 
 (defun org-indent-bars-pixel-bar (level width)
   "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
@@ -93,14 +100,30 @@ foreground colors of the 8 faces in `org-level-faces'.
  (dotimes (l 3) (message "%s" l))
  (number-sequence 1 5); (1 2 3 4 5)
  (number-sequence 1 1); (1)
+
+ (s-join (s-repeat 2 "0") '("a" "b")) ; "a00b"
+ (let ((none-pixels (s-repeat 2 "0")))
+   (concat (s-join none-pixels '("a" "b")) none-pixels)) ; "a00b00"
  )
 
 ;;;; test
 
+;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert t)))
+
+(comment ; manual test with different org-indent-indentation-per-level
+ (setq org-indent-indentation-per-level 1)
+ (setq org-indent-indentation-per-level 2)
+ (setq org-indent-indentation-per-level 3)
+ )
+
+
 (ert-deftest org-indent-bars-pixel-line-test ()
-  (should (string= (org-indent-bars-pixel-line 3 3) "\"010020030\","))
-  (should (string= (org-indent-bars-pixel-line 3 4) "\"001000200030\","))
-  (should (string= (org-indent-bars-pixel-line 2 6) "\"000100000200\",")))
+  (should (string= (org-indent-bars-pixel-line 3 3 1) "\"010020030\","))
+  (should (string= (org-indent-bars-pixel-line 3 4 1) "\"001000200030\","))
+  (should (string= (org-indent-bars-pixel-line 2 6 1) "\"000100000200\","))
+  (should (string= (org-indent-bars-pixel-line 2 3 1) "\"010020\","))
+  (should (string= (org-indent-bars-pixel-line 2 3 2) "\"010000020000\","))
+  (should (string= (org-indent-bars-pixel-line 2 3 3) "\"010000000020000000\",")))
 
 (ert-deftest org-indent-bars-pixel-bar-test ()
   (should (string= (org-indent-bars-pixel-bar 3 1) "3"))
