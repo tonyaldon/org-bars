@@ -170,9 +170,6 @@ It is meant to be used in `before-change-functions'."
   (when (org-at-heading-p)
     (add-text-properties (point-at-bol) (1+ (point-at-eol)) 'display nil)))
 
-;; (push 'jit-lock-after-change after-change-functions)
-;; (setq after-change-functions (delq 'jit-lock-after-change after-change-functions))
-
 ;;; compute prefixes
 
 (defun org-indent-bars-compute-prefixes ()
