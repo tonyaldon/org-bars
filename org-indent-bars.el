@@ -165,15 +165,15 @@ This function is meant to override `org-get-level-face' with an advice."
                     (nth (% (1- org-l) org-n-level-faces) org-level-faces)
                   (nth (1- (min org-l org-n-level-faces)) org-level-faces))))
     (cond
-     ;; -------
-     ;; BEG: part changed from `org-get-level-face'
-     ;; ((eq n 1) (if org-hide-leading-stars 'org-hide org-f)) ; default
-     ;; ((eq n 1) '(face nil display "÷"))
-     ((eq n 1) `(face nil display
-                      ,(or (= org-l0 1)
-                           (org-indent-bars-xpm-image (1- org-l0))))) ; works
-     ;; END: part changed from `org-get-level-face'
-     ;; -------
+     ;; we return 'default face because a face is expected as a result.
+     ;; But this face will never be used because it is applied to
+     ;; a part of the buffer we make invisible.
+     ((eq n 1)
+      (or (= org-l0 1)
+          (add-text-properties
+           beg-1 (- end-2 2) '(invisible org-indent-bars-invisible)))
+      'default)
+
      ((eq n 2) org-f)
      (t (unless org-level-color-stars-only org-f)))))
 
@@ -255,6 +255,7 @@ with an advice."
                 'org-indent-bars-compute-prefixes)
     (advice-add 'org-get-level-face :override
                 'org-indent-bars-get-level-face)
+    (add-to-invisibility-spec '(org-indent-bars-invisible))
     (org-indent-mode -1)
     (org-indent-mode 1))
    (t
@@ -266,6 +267,7 @@ with an advice."
                    'org-indent-bars-get-level-face)
     (org-map-entries
      '(add-text-properties (point-at-bol) (1+ (point-at-eol)) 'display nil))
+    (remove-from-invisibility-spec '(org-indent-bars-invisible))
     (org-indent-mode -1))))
 
 (global-set-key (kbd "C-<f2>") 'org-indent-bars-mode)
