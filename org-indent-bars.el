@@ -180,9 +180,9 @@ See `face-nontrivial-p', `org-indent-bars-subtree-is-empty-p' and
 `org-indent-bars-subtree-is-invisible-p'.")
 
 (defvar org-indent-bars-stars
-  '(:empty "* "
-    :invisible "+ "
-    :visible "- ")
+  '(:empty "*"
+    :invisible "+"
+    :visible "-")
   "Plist of the strings used in place of the star \"* \" in heading lines.
 The replacement star is choosen accordingly to the state of the subtree:
 :empty
@@ -263,9 +263,16 @@ This function is meant to override `org-get-level-face' with an advice."
       (let* ((star (org-indent-bars-star))
              (star-s (plist-get star :star))
              (star-f (plist-get star :face)))
-        (add-text-properties beg-2 end-2 `(display ,star-s))
+        (compose-region beg-2 (1- end-2) star-s)
         (if (face-nontrivial-p star-f) star-f org-f)))
      (t (unless org-level-color-stars-only org-f)))))
+
+(defun org-indent-bars-remove-replacement-stars ()
+  "Remove replacement stars `org-indent-bars-stars' on every heading lines."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\(\\**\\)\\(\\* \\)" nil t)
+      (decompose-region (match-beginning 2) (match-end 2)))))
 
 ;;;; tests
 
@@ -371,8 +378,7 @@ with an advice."
                    'org-indent-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
                    'org-indent-bars-get-level-face)
-    (org-map-entries
-     '(add-text-properties (point-at-bol) (1+ (point-at-eol)) 'display nil))
+    (org-indent-bars-remove-replacement-stars)
     (remove-from-invisibility-spec '(org-indent-bars-invisible))
     (org-indent-mode -1))))
 
