@@ -264,6 +264,17 @@ This function is meant to override `org-get-level-face' with an advice."
         (if (face-nontrivial-p star-f) star-f org-f)))
      (t (unless org-level-color-stars-only org-f)))))
 
+(defun org-indent-bars-refresh-stars (state)
+  "Refontify all visible heading stars each time `org-cycle' command is used.
+
+This function is meant to be added to `org-cycle-hook'."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward org-outline-regexp nil t)
+      (with-silent-modifications
+        (unless (car (get-char-property-and-overlay (point) 'invisible))
+          (put-text-property (point-at-bol) (point-at-eol) 'fontified nil))))))
+
 (defun org-indent-bars-remove-replacement-stars ()
   "Remove replacement stars `org-indent-bars-stars' on every heading lines."
   (save-excursion
@@ -365,6 +376,7 @@ with an advice."
                 'org-indent-bars-compute-prefixes)
     (advice-add 'org-get-level-face :override
                 'org-indent-bars-get-level-face)
+    (add-hook 'org-cycle-hook 'org-indent-bars-refresh-stars nil t)
     (add-to-invisibility-spec '(org-indent-bars-invisible))
     (org-indent-mode -1)
     (org-indent-mode 1))
@@ -375,6 +387,7 @@ with an advice."
                    'org-indent-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
                    'org-indent-bars-get-level-face)
+    (remove-hook 'org-cycle-hook 'org-indent-bars-refresh-stars t)
     (org-indent-bars-remove-replacement-stars)
     (remove-from-invisibility-spec '(org-indent-bars-invisible))
     (org-indent-mode -1))))
