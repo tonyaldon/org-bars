@@ -72,6 +72,7 @@
 
 (ert-deftest org-bars-pixel-line-test ()
   (should (string= (org-bars-pixel-line 3 3 1) "\"010020030\","))
+  (should (string= (org-bars-pixel-line 3 3 1 'only-one-color) "\"0*00*00*0\","))
   (should (string= (org-bars-pixel-line 3 4 1) "\"001000200030\","))
   (should (string= (org-bars-pixel-line 2 6 1) "\"000100000200\","))
   (should (string= (org-bars-pixel-line 2 3 1) "\"010020\","))
@@ -84,7 +85,12 @@
   (should (string= (org-bars-pixel-bar 3 3) "030"))
   (should (string= (org-bars-pixel-bar 3 5) "00300"))
   (should (string= (org-bars-pixel-bar 3 4) "0030"))
-  (should (string= (org-bars-pixel-bar 1 6) "000100")))
+  (should (string= (org-bars-pixel-bar 1 6) "000100"))
+  (should (string= (org-bars-pixel-bar 3 1 t) "*"))
+  (should (string= (org-bars-pixel-bar 3 2 t) "0*"))
+  (should (string= (org-bars-pixel-bar 3 3 t) "0*0"))
+  (should (string= (org-bars-pixel-bar 3 5 t) "00*00"))
+  (should (string= (org-bars-pixel-bar 3 5 'only-one-color) "00*00")))
 
 (ert-deftest org-bars-color-level-test ()
   (defface color-level '((t :foreground "#4dafc3")) "" :group 'org-faces)
@@ -92,7 +98,7 @@
    (string= (org-bars-color-level 'color-level 30 15)
             "#4eea6ed47558")))
 
-(ert-deftest org-bars-xpm-color-spec-test ()
+(ert-deftest org-bars-xpm-color-spec-with-level-faces-test ()
   (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
   (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
   (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
@@ -100,10 +106,37 @@
         (desaturate 30)
         (darken 15))
     (should
-     (string= (org-bars-xpm-color-spec desaturate darken)
+     (string= (org-bars-xpm-color-spec-with-level-faces desaturate darken)
               (concat "\"1 c #4eea6ed47558\","
                       "\"2 c #840860a45952\","
                       "\"3 c #942563507310\","
+                      "\"0 c None\",")))))
+
+(ert-deftest org-bars-xpm-color-spec-one-color-test ()
+  (should
+   (string= (org-bars-xpm-color-spec-one-color "#00ff00")
+            (concat "\"* c #00ff00\","
+                    "\"0 c None\","))))
+
+(ert-deftest org-bars-xpm-color-spec-test ()
+  (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
+  (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
+  (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
+  (let ((org-level-faces '(color-level-1 color-level-2 color-level-3)))
+    (should
+     (string= (org-bars-xpm-color-spec
+               '(:only-one-color nil
+                 :desaturate-level-faces 30
+                 :darken-level-faces 15))
+              (concat "\"1 c #4eea6ed47558\","
+                      "\"2 c #840860a45952\","
+                      "\"3 c #942563507310\","
+                      "\"0 c None\",")))
+    (should
+     (string= (org-bars-xpm-color-spec
+               '(:only-one-color t
+                 :bar-color "#ff0000"))
+              (concat "\"* c #ff0000\","
                       "\"0 c None\",")))))
 
 (comment ; for manual testing

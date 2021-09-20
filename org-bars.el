@@ -14,7 +14,10 @@ LEVEL must be strickly superior to 0."
          (indentation org-indent-indentation-per-level)
          (colors 9) ; 8 org face levels + None color
          (dimensions (org-bars-xpm-dimensions level width indentation height colors))
-         (color-spec (org-bars-xpm-color-spec 30 15))
+         (color-spec
+          (org-bars-xpm-color-spec '(:only-one-color nil
+                                     :desaturate-level-faces 30
+                                     :darken-level-faces 15)))
          (pixel-line (org-bars-pixel-line level width indentation))
          (raster (-reduce #'concat (-repeat height pixel-line)))
          (end "};")
@@ -44,7 +47,7 @@ the line."
 
 ;; if we want to add vertical padding to heading line we need
 ;; to add one extra left None pixel to every pixel-lines
-(defun org-bars-pixel-line (level width indentation) ; maybe add argument: vpadding
+(defun org-bars-pixel-line (level width indentation &optional only-one-color) ; maybe add argument: vpadding
   "Return the pixels line for level LEVEL with WIDTH being the character's width.
 
  (* WIDTH (- INDENTATION 1)) corresponds to the number of None pixels we add
@@ -56,39 +59,52 @@ used as `line-prefix' text property for each line for the level
 LEVEL in the org tree."
   (let ((none-pixels (s-repeat (* (1- indentation) width) "0")))
     (concat "\""
-            (s-join none-pixels (--map (org-bars-pixel-bar it width)
-                                       (number-sequence 1 level)))
+            (s-join none-pixels
+                    (--map (org-bars-pixel-bar it width only-one-color)
+                           (number-sequence 1 level)))
             none-pixels
             "\",")))
 
-(defun org-bars-pixel-bar (level width)
+(defun org-bars-pixel-bar (level width &optional only-one-color)
   "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
-For instance (org-bars-pixel-bar 3 9) -> \"000030000\"."
+
+If ONLY-ONE-COLOR is non-nil, LEVEL pixel is replaced by a star *.
+For instance:
+    (org-bars-pixel-bar 3 9) -> \"000030000\".
+    (org-bars-pixel-bar 3 9 t) -> \"0000*0000\"."
   (cond
-   ((= width 1) (number-to-string level))
-   ((= width 2) (concat "0" (number-to-string level)))
+   ((= width 1) (or (and only-one-color "*")
+                    (number-to-string level)))
+   ((= width 2) (concat "0" (or (and only-one-color "*")
+                                (number-to-string level))))
    ((= (mod width 2) 1)
     (concat (s-repeat (floor (/ width 2.0)) "0")
-            (number-to-string level)
+            (or (and only-one-color "*")
+                (number-to-string level))
             (s-repeat (floor (/ width 2.0)) "0")))
    (t
     (let* ((l-pixels (floor (/ width 2.0)))
            (r-pixels (1- l-pixels)))
       (concat (s-repeat l-pixels "0")
-              (number-to-string level)
+              (or (and only-one-color "*")
+                  (number-to-string level))
               (s-repeat r-pixels "0"))))))
 
 (defun org-bars-color-level (face desaturate darken)
-  "Desaturate and darken foreground color of FACE."
+  "Desaturate and darken foreground color of FACE.
+
+0 <= DESATURATE <= 100 and 0 <= DARKEN <= 100.
+See `color-desaturate-name' and `color-darken-name'."
   (-> (face-foreground face nil t)
       (color-desaturate-name desaturate)
       (color-darken-name darken)))
 
-(defun org-bars-xpm-color-spec (desaturate darken)
-  "Return color specification used in XPM format.
-1 to 8 corresponds to a modified version of the
-foreground colors of the 8 faces in `org-level-faces'.
-0 corresponds to color None."
+(defun org-bars-xpm-color-spec-with-level-faces (desaturate darken)
+  "Return xpm color specification with color derivate from `org-level-faces'.
+
+In the xpm color specification, 1 to 8 corresponds to derivate
+colors from the foreground colors of the 8 faces in `org-level-faces'.
+And 0 corresponds to the color None."
   (concat
    (-reduce
     #'concat
@@ -98,7 +114,50 @@ foreground colors of the 8 faces in `org-level-faces'.
                    org-level-faces))
    "\"0 c None\","))
 
+(defun org-bars-xpm-color-spec-one-color (color)
+  "Return xpm color specification with one color COLOR and None color.
 
+In the xpm color specification, * corresponds to color COLOR
+and 0 to None."
+  (concat "\"* c " color "\","
+          "\"0 c None\","))
+
+(defun org-bars-xpm-color-spec (color-options)
+  "Return xpm color specification respecting options COLOR-OPTIONS.
+
+COLOR-OPTIONS is a plist with the same specification as
+`org-bars-color-options' variable."
+  (let ((only-one-color-p (plist-get color-options :only-one-color))
+        (color            (plist-get color-options :bar-color))
+        (desaturate       (plist-get color-options :desaturate-level-faces))
+        (darken           (plist-get color-options :darken-level-faces)))
+    (if only-one-color-p
+        (org-bars-xpm-color-spec-one-color
+         (or color (face-attribute 'default :foreground)))
+      (org-bars-xpm-color-spec-with-level-faces (or desaturate 0)
+                                                (or darken 0)))))
+
+(defvar org-bars-color-options
+  `(:only-one-color nil
+    :bar-color ,(face-attribute 'default :foreground)
+    :desaturate-level-faces 30
+    :darken-level-faces 15)
+  "Plist holding user options related to the colors of the level bars.
+
+:only-one-color
+    If t, the level bars have the color `:bar-color'.
+    If nil, the level bars inherit the color of the foreground faces
+    of the heading lines.  See `org-level-faces'.
+:bar-color
+    If `:only-one-color' is non-nil, use this color for the level bars.
+:desaturate-level-faces
+    If `:only-one-color' is nil, apply this number (0 to 100) to
+    desaturate the colors from the foreground color of the faces
+    `org-level-faces'.  See `org-bars-color-level'.
+:darken-level-faces
+    If `:only-one-color' is nil, apply this number (0 to 100) to
+    darken the colors from the foreground color of the faces
+    `org-level-faces'.  See `org-bars-color-level'.")
 
 ;;;; comment
 
@@ -117,6 +176,9 @@ foreground colors of the 8 faces in `org-level-faces'.
  (s-join (s-repeat 2 "0") '("a" "b")) ; "a00b"
  (let ((none-pixels (s-repeat 2 "0")))
    (concat (s-join none-pixels '("a" "b")) none-pixels)) ; "a00b00"
+
+ (color-desaturate-name "#ff0000" 0) ; "#ffff00000000"
+ (color-darken-name "#ff0000" 0) ; "#ffff00000000"
  )
 
 ;;; font lock stuff for heading lines, org-get-level-face
