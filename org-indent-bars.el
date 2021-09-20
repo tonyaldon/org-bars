@@ -19,11 +19,6 @@ LEVEL must be strickly superior to 0."
          (dimensions
           (concat "\"" width-str " " heigth-str " " colors " " character-per-pixel "\","))
          (color-spec (org-indent-bars-xpm-color-spec 30 15))
-         (pixel-bar (org-indent-bars-pixel-bar
-                     (or (and (= 0 (mod level org-n-level-faces))
-                              org-n-level-faces)
-                         (mod level org-n-level-faces))
-                     width))
          (pixel-line (org-indent-bars-pixel-line level width indentation))
          (raster (-reduce #'concat (-repeat height pixel-line)))
          (end "};")
