@@ -134,15 +134,15 @@ foreground colors of the 8 faces in `org-level-faces'.
   (should (string= (org-bars-pixel-bar 1 6) "000100")))
 
 (ert-deftest org-bars-color-level-test ()
-  (defface color-level '((t :foreground "#4dafc3")) "")
+  (defface color-level '((t :foreground "#4dafc3")) "" :group 'org-faces)
   (should
    (string= (org-bars-color-level 'color-level 30 15)
             "#4eea6ed47558")))
 
 (ert-deftest org-bars-xpm-color-spec-test ()
-  (defface color-level-1 '((t :foreground "#4dafc3")) "")
-  (defface color-level-3 '((t :foreground "#d07391")) "")
-  (defface color-level-2 '((t :foreground "#c97260")) "")
+  (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
+  (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
+  (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
   (let ((org-level-faces '(color-level-1 color-level-2 color-level-3))
         (desaturate 30)
         (darken 15))
@@ -161,15 +161,17 @@ foreground colors of the 8 faces in `org-level-faces'.
 when corresponding subtree is empty.  If trivial, faces in
 `org-level-faces' will be used.
 
-See `face-nontrivial-p' and `org-bars-subtree-is-empty-p'.")
+See `face-nontrivial-p' and `org-bars-subtree-is-empty-p'."
+  :group 'org-faces)
 
 (defface org-bars-star-invisible nil
   "If non trivial, this is the face used for the heading star
-when corresponding subtree is not empty and invisible.  If trivial,
+when corresponding subtree is invisible and not empty.  If trivial,
 faces in `org-level-faces' will be used.
 
 See `face-nontrivial-p', `org-bars-subtree-is-empty-p' and
-`org-bars-subtree-is-invisible-p'.")
+`org-bars-subtree-is-invisible-p'."
+  :group 'org-faces)
 
 (defface org-bars-star-visible nil
   "If non trivial, this is the face used for the heading star
@@ -177,7 +179,8 @@ when corresponding subtree is not visible.  If trivial, faces
 in `org-level-faces' will be used.
 
 See `face-nontrivial-p', `org-bars-subtree-is-empty-p' and
-`org-bars-subtree-is-invisible-p'.")
+`org-bars-subtree-is-invisible-p'."
+  :group 'org-faces)
 
 (defvar org-bars-stars
   '(:empty "*"
