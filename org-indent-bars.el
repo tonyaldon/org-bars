@@ -12,7 +12,7 @@ LEVEL must be strickly superior to 0."
          (width 9) ; 9 calculated on my device with fill-column-indicator package
          (height 18) ; 18 calculated on my device with fill-column-indicator package
          (indentation org-indent-indentation-per-level)
-         (width-str (number-to-string (+ (* (1- indentation) width) (* level width))))
+         (width-str (number-to-string (* level width indentation)))
          (heigth-str (number-to-string height))
          (character-per-pixel "1")
          (colors "9") ; 8 org face levels + None color
@@ -88,8 +88,10 @@ foreground colors of the 8 faces in `org-level-faces'.
 
 (comment ; dotimes, number-sequence, org-indent-bars-xpm-image
  (insert (propertize " " 'display (org-indent-bars-xpm-image 1)))
+ (insert (propertize " " 'display (org-indent-bars-xpm-image 2)))
  (insert (propertize " " 'display (org-indent-bars-xpm-image 3)))
- (insert (propertize " " 'display (org-indent-bars-xpm-image 9)))
+ (insert (propertize " " 'display (org-indent-bars-xpm-image 4)))
+ (insert (propertize " " 'display (org-indent-bars-xpm-image 5)))
  (insert (propertize " " 'display (org-indent-bars-xpm-image 17)))
 
  (dotimes (l 3) (message "%s" l))
