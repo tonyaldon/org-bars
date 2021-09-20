@@ -12,12 +12,8 @@ LEVEL must be strickly superior to 0."
          (width 9) ; 9 calculated on my device with fill-column-indicator package
          (height 18) ; 18 calculated on my device with fill-column-indicator package
          (indentation org-indent-indentation-per-level)
-         (width-str (number-to-string (* level width indentation)))
-         (heigth-str (number-to-string height))
-         (character-per-pixel "1")
-         (colors "9") ; 8 org face levels + None color
-         (dimensions
-          (concat "\"" width-str " " heigth-str " " colors " " character-per-pixel "\","))
+         (colors 9) ; 8 org face levels + None color
+         (dimensions (org-bars-xpm-dimensions level width indentation height colors))
          (color-spec (org-bars-xpm-color-spec 30 15))
          (pixel-line (org-bars-pixel-line level width indentation))
          (raster (-reduce #'concat (-repeat height pixel-line)))
@@ -27,6 +23,24 @@ LEVEL must be strickly superior to 0."
             :data ,data
             :mask heuristic
             :ascent center)))
+
+(defun org-bars-xpm-dimensions (level width indentation height colors &optional vpadding)
+  "Return the xpm dimensions.
+
+In practice, `org-bars-xpm-dimensions' is called with INDENTATION argument
+value equal to `org-indent-indentation-per-level'.
+
+If VPADDING is non-nil, it corresponds to the number of None pixels
+we add on the top and the bottom of the xpm images.  If the resulting
+HEIGHT + (2*VPADDING) is superior of the line height (of the font)
+where the image is inserted, this visually results in a padding arround
+the line."
+  (let ((width-str (number-to-string (* level width indentation)))
+        (heigth-str (number-to-string
+                     (if vpadding (+ (* 2 vpadding) height) height)))
+        (character-per-pixel "1"))
+    (concat "\"" width-str " " heigth-str " "
+            (number-to-string colors) " " character-per-pixel "\",")))
 
 ;; if we want to add vertical padding to heading line we need
 ;; to add one extra left None pixel to every pixel-lines
