@@ -100,8 +100,8 @@
 
 (ert-deftest org-bars-xpm-color-spec-with-level-faces-test ()
   (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
-  (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
   (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
+  (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
   (let ((org-level-faces '(color-level-1 color-level-2 color-level-3))
         (desaturate 30)
         (darken 15))
@@ -119,10 +119,10 @@
                     "\"0 c None\","))))
 
 (ert-deftest org-bars-xpm-color-spec-test ()
-  (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
-  (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
-  (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
-  (let ((org-level-faces '(color-level-1 color-level-2 color-level-3)))
+  (defface color-level-a '((t :foreground "#4dafc3")) "" :group 'org-faces)
+  (defface color-level-b '((t :foreground "#c97260")) "" :group 'org-faces)
+  (defface color-level-c '((t :foreground "#d07391")) "" :group 'org-faces)
+  (let ((org-level-faces '(color-level-a color-level-b color-level-c)))
     (should
      (string= (org-bars-xpm-color-spec
                '(:only-one-color nil
