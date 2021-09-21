@@ -35,6 +35,50 @@
  (setq org-indent-indentation-per-level 3)
  )
 
+(ert-deftest org-bars-xpm-data-test ()
+  (let ((level 1)
+        (width 3)
+        (height 6)
+        (indentation 1)
+        (color-options '(:only-one-color t :bar-color "#00ff00")))
+    (should (string=
+             (org-bars-xpm-data level width height indentation color-options)
+             (concat "/* XPM */\nstatic char *rule[] = {"
+                     "\"3 6 2 1\","
+                     "\"* c #00ff00\",\"0 c None\","
+                     "\"0*0\","
+                     "\"0*0\","
+                     "\"0*0\","
+                     "\"0*0\","
+                     "\"0*0\","
+                     "\"0*0\",};"))))
+  (defface color-level-A '((t :foreground "#4dafc3")) "" :group 'org-faces)
+  (defface color-level-B '((t :foreground "#c97260")) "" :group 'org-faces)
+  (defface color-level-C '((t :foreground "#d07391")) "" :group 'org-faces)
+  (let ((level 3)
+        (width 5)
+        (height 8)
+        (indentation 2)
+        (color-options '(:only-one-color nil
+                         :desaturate-level-faces 30
+                         :darken-level-faces 15))
+        (org-n-level-faces 3)
+        (org-level-faces '(color-level-A color-level-B color-level-C)))
+    (should (string=
+             (org-bars-xpm-data level width height indentation color-options)
+             (concat "/* XPM */\nstatic char *rule[] = {"
+                     "\"30 8 4 1\","
+                     "\"1 c #4eea6ed47558\",\"2 c #840860a45952\",\"3 c #942563507310\",\"0 c None\","
+                     ;;  bar  ind  bar  ind  bar  ind
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\","
+                     "\"001000000000200000000030000000\",};")))))
+
 (ert-deftest org-bars-xpm-dimensions-test ()
   (let ((level 1)
         (width 3)

@@ -8,24 +8,32 @@ of each line at the level LEVEL (LEVEL > 0) in the org tree, is set to
 the XPM image produced by `org-bars-xpm-image'.
 
 LEVEL must be strickly superior to 0."
-  (let* ((identifier "/* XPM */\nstatic char *rule[] = {")
-         (width 9) ; 9 calculated on my device with fill-column-indicator package
+  (let* ((width 9) ; 9 calculated on my device with fill-column-indicator package
          (height 18) ; 18 calculated on my device with fill-column-indicator package
          (indentation org-indent-indentation-per-level)
-         (colors 9) ; 8 org face levels + None color
-         (dimensions (org-bars-xpm-dimensions level width indentation height colors))
-         (color-spec
-          (org-bars-xpm-color-spec '(:only-one-color nil
-                                     :desaturate-level-faces 30
-                                     :darken-level-faces 15)))
-         (pixel-line (org-bars-pixel-line level width indentation))
-         (raster (-reduce #'concat (-repeat height pixel-line)))
-         (end "};")
-         (data (concat identifier dimensions color-spec raster end)))
+         (color-options '(:only-one-color nil
+                          :desaturate-level-faces 30
+                          :darken-level-faces 15))
+         (data (org-bars-xpm-data level width height indentation color-options)))
     `(image :type xpm
             :data ,data
             :mask heuristic
             :ascent center)))
+
+(defun org-bars-xpm-data (level width height indentation color-options)
+  "Return xpm data string.
+
+COLOR-OPTIONS is a plist with the same specification as
+`org-bars-color-options' variable."
+  (let* ((identifier "/* XPM */\nstatic char *rule[] = {")
+         (only-one-color-p (plist-get color-options :only-one-color))
+         (colors (if only-one-color-p 2 (1+ org-n-level-faces)))
+         (dimensions (org-bars-xpm-dimensions level width indentation height colors))
+         (color-spec (org-bars-xpm-color-spec color-options))
+         (pixel-line (org-bars-pixel-line level width indentation only-one-color-p))
+         (raster (-reduce #'concat (-repeat height pixel-line)))
+         (end "};"))
+    (concat identifier dimensions color-spec raster end)))
 
 (defun org-bars-xpm-dimensions (level width indentation height colors &optional vpadding)
   "Return the xpm dimensions.
