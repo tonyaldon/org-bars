@@ -28,6 +28,7 @@
 (require 'ert)
 
 ;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert t)))
+;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert "org-bars-xpm-data-test")))
 
 (comment ; manual test with different org-indent-indentation-per-level
  (setq org-indent-indentation-per-level 1)
@@ -36,48 +37,59 @@
  )
 
 (ert-deftest org-bars-xpm-data-test ()
-  (let ((level 1)
-        (width 3)
-        (height 6)
-        (indentation 1)
-        (color-options '(:only-one-color t :bar-color "#00ff00")))
-    (should (string=
-             (org-bars-xpm-data level width height indentation color-options)
-             (concat "/* XPM */\nstatic char *rule[] = {"
-                     "\"3 6 2 1\","
-                     "\"* c #00ff00\",\"0 c None\","
-                     "\"0*0\","
-                     "\"0*0\","
-                     "\"0*0\","
-                     "\"0*0\","
-                     "\"0*0\","
-                     "\"0*0\",};"))))
+  (should (string=
+           (org-bars-xpm-data 1 3 6
+                              '(:only-one-color t :bar-color "#00ff00")
+                              '(:org-indent-indentation-per-level 1))
+           (concat "/* XPM */\nstatic char *rule[] = {"
+                   "\"3 6 2 1\","
+                   "\"* c #00ff00\",\"0 c None\","
+                   "\"0*0\","
+                   "\"0*0\","
+                   "\"0*0\","
+                   "\"0*0\","
+                   "\"0*0\","
+                   "\"0*0\",};")))
+
   (defface color-level-A '((t :foreground "#4dafc3")) "" :group 'org-faces)
   (defface color-level-B '((t :foreground "#c97260")) "" :group 'org-faces)
   (defface color-level-C '((t :foreground "#d07391")) "" :group 'org-faces)
-  (let ((level 3)
-        (width 5)
-        (height 8)
-        (indentation 2)
-        (color-options '(:only-one-color nil
-                         :desaturate-level-faces 30
-                         :darken-level-faces 15))
-        (org-n-level-faces 3)
-        (org-level-faces '(color-level-A color-level-B color-level-C)))
-    (should (string=
-             (org-bars-xpm-data level width height indentation color-options)
-             (concat "/* XPM */\nstatic char *rule[] = {"
-                     "\"30 8 4 1\","
-                     "\"1 c #4eea6ed47558\",\"2 c #840860a45952\",\"3 c #942563507310\",\"0 c None\","
-                     ;;  bar  ind  bar  ind  bar  ind
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\","
-                     "\"001000000000200000000030000000\",};")))))
+  (should (string=
+           (org-bars-xpm-data 6 3 5
+                              '(:only-one-color nil
+                                :desaturate-level-faces 30
+                                :darken-level-faces 15)
+                              '(:org-indent-indentation-per-level 2
+                                :org-cycle-level-faces t
+                                :org-n-level-faces 3
+                                :org-level-faces (color-level-A color-level-B color-level-C)))
+           (concat "/* XPM */\nstatic char *rule[] = {"
+                   "\"36 5 4 1\","
+                   "\"1 c #4eea6ed47558\",\"2 c #840860a45952\",\"3 c #942563507310\",\"0 c None\","
+                   ;;  | ind | ind | ind | ind | ind | ind
+                   "\"010000020000030000010000020000030000\","
+                   "\"010000020000030000010000020000030000\","
+                   "\"010000020000030000010000020000030000\","
+                   "\"010000020000030000010000020000030000\","
+                   "\"010000020000030000010000020000030000\",};")))
+  (should (string=
+           (org-bars-xpm-data 6 3 5
+                              '(:only-one-color nil
+                                :desaturate-level-faces 30
+                                :darken-level-faces 15)
+                              '(:org-indent-indentation-per-level 2
+                                :org-cycle-level-faces nil
+                                :org-n-level-faces 3
+                                :org-level-faces (color-level-A color-level-B color-level-C)))
+           (concat "/* XPM */\nstatic char *rule[] = {"
+                   "\"36 5 4 1\","
+                   "\"1 c #4eea6ed47558\",\"2 c #840860a45952\",\"3 c #942563507310\",\"0 c None\","
+                   ;;  | ind | ind | ind | ind | ind | ind
+                   "\"010000020000030000030000030000030000\","
+                   "\"010000020000030000030000030000030000\","
+                   "\"010000020000030000030000030000030000\","
+                   "\"010000020000030000030000030000030000\","
+                   "\"010000020000030000030000030000030000\",};"))))
 
 (ert-deftest org-bars-xpm-dimensions-test ()
   (let ((level 1)
@@ -86,7 +98,7 @@
         (height 6)
         (colors 2))
     (should (string= (org-bars-xpm-dimensions
-                      level width indentation height colors)
+                      level width height indentation colors)
                      "\"3 6 2 1\",")))
   (let ((level 1)
         (width 3)
@@ -95,7 +107,7 @@
         (colors 2)
         (vpadding 2))
     (should (string= (org-bars-xpm-dimensions
-                      level width indentation height colors vpadding)
+                      level width height indentation colors vpadding)
                      "\"3 10 2 1\",")))
   (let ((level 1)
         (width 3)
@@ -103,7 +115,7 @@
         (height 6)
         (colors 2))
     (should (string= (org-bars-xpm-dimensions
-                      level width indentation height colors)
+                      level width height indentation colors)
                      "\"9 6 2 1\",")))
   (let ((level 3)
         (width 3)
@@ -111,17 +123,20 @@
         (height 12)
         (colors 4))
     (should (string= (org-bars-xpm-dimensions
-                      level width indentation height colors)
+                      level width height indentation colors)
                      "\"27 12 4 1\","))))
 
 (ert-deftest org-bars-pixel-line-test ()
-  (should (string= (org-bars-pixel-line 3 3 1) "\"010020030\","))
-  (should (string= (org-bars-pixel-line 3 3 1 'only-one-color) "\"0*00*00*0\","))
-  (should (string= (org-bars-pixel-line 3 4 1) "\"001000200030\","))
-  (should (string= (org-bars-pixel-line 2 6 1) "\"000100000200\","))
-  (should (string= (org-bars-pixel-line 2 3 1) "\"010020\","))
-  (should (string= (org-bars-pixel-line 2 3 2) "\"010000020000\","))
-  (should (string= (org-bars-pixel-line 2 3 3) "\"010000000020000000\",")))
+  (should (string= (org-bars-pixel-line 6 3 1 nil '(:org-cycle-level-faces t
+                                                    :org-n-level-faces 3))
+                   "\"010020030010020030\","))
+  (should (string= (org-bars-pixel-line 6 3 1 nil '(:org-cycle-level-faces nil
+                                                    :org-n-level-faces 3))
+                   "\"010020030030030030\","))
+  (should (string= (org-bars-pixel-line 6 3 1 'only-one-color) "\"0*00*00*00*00*00*0\","))
+  (should (string= (org-bars-pixel-line 2 3 1 'only-one-color) "\"0*00*0\","))
+  (should (string= (org-bars-pixel-line 2 3 2 'only-one-color) "\"0*00000*0000\","))
+  (should (string= (org-bars-pixel-line 2 3 3 'only-one-color) "\"0*00000000*0000000\",")))
 
 (ert-deftest org-bars-cycle-level-test ()
   (should (= (org-bars-cycle-level
@@ -178,14 +193,24 @@
   (defface color-level-1 '((t :foreground "#4dafc3")) "" :group 'org-faces)
   (defface color-level-2 '((t :foreground "#c97260")) "" :group 'org-faces)
   (defface color-level-3 '((t :foreground "#d07391")) "" :group 'org-faces)
-  (let ((org-level-faces '(color-level-1 color-level-2 color-level-3))
+  (should
+   (string= (org-bars-xpm-color-spec-with-level-faces
+             30 15 '(:org-n-level-faces 8 ; default org-mode value
+                     :org-level-faces   (color-level-1 color-level-2 color-level-3)))
+            (concat "\"1 c #4eea6ed47558\","
+                    "\"2 c #840860a45952\","
+                    "\"3 c #942563507310\","
+                    "\"0 c None\",")))
+  (let ((org-options '(:org-n-level-faces 2 ; < 8
+                       :org-level-faces   (color-level-1 color-level-2 color-level-3)))
         (desaturate 30)
         (darken 15))
     (should
-     (string= (org-bars-xpm-color-spec-with-level-faces desaturate darken)
+     (string= (org-bars-xpm-color-spec-with-level-faces
+               30 15 '(:org-n-level-faces 2 ; < 8
+                       :org-level-faces   (color-level-1 color-level-2 color-level-3)))
               (concat "\"1 c #4eea6ed47558\","
                       "\"2 c #840860a45952\","
-                      "\"3 c #942563507310\","
                       "\"0 c None\",")))))
 
 (ert-deftest org-bars-xpm-color-spec-one-color-test ()
@@ -198,22 +223,24 @@
   (defface color-level-a '((t :foreground "#4dafc3")) "" :group 'org-faces)
   (defface color-level-b '((t :foreground "#c97260")) "" :group 'org-faces)
   (defface color-level-c '((t :foreground "#d07391")) "" :group 'org-faces)
-  (let ((org-level-faces '(color-level-a color-level-b color-level-c)))
-    (should
-     (string= (org-bars-xpm-color-spec
-               '(:only-one-color nil
-                 :desaturate-level-faces 30
-                 :darken-level-faces 15))
-              (concat "\"1 c #4eea6ed47558\","
-                      "\"2 c #840860a45952\","
-                      "\"3 c #942563507310\","
-                      "\"0 c None\",")))
-    (should
-     (string= (org-bars-xpm-color-spec
-               '(:only-one-color t
-                 :bar-color "#ff0000"))
-              (concat "\"* c #ff0000\","
-                      "\"0 c None\",")))))
+  (should
+   (string= (org-bars-xpm-color-spec '(:only-one-color nil
+                                       :desaturate-level-faces 30
+                                       :darken-level-faces 15)
+                                      '(:org-n-level-faces 8 ; default org-mode value
+                                        :org-level-faces   (color-level-a color-level-b color-level-c)))
+            (concat "\"1 c #4eea6ed47558\","
+                    "\"2 c #840860a45952\","
+                    "\"3 c #942563507310\","
+                    "\"0 c None\",")))
+  (should
+   (string= (org-bars-xpm-color-spec '(:only-one-color t
+                                       :bar-color "#ff0000")
+                                      '(:org-n-level-faces 8 ; default org-mode value
+                                        :org-level-faces   (color-level-a color-level-b color-level-c)))
+            (concat "\"* c #ff0000\","
+                    "\"0 c None\","))))
+
 
 (comment ; for manual testing
  (custom-set-faces
