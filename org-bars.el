@@ -159,14 +159,13 @@ COLOR-OPTIONS is a plist with the same specification as
         (desaturate       (plist-get color-options :desaturate-level-faces))
         (darken           (plist-get color-options :darken-level-faces)))
     (if only-one-color-p
-        (org-bars-xpm-color-spec-one-color
-         (or color (face-attribute 'default :foreground)))
+        (org-bars-xpm-color-spec-one-color (or color "#8c8c8c"))
       (org-bars-xpm-color-spec-with-level-faces (or desaturate 0)
                                                 (or darken 0)))))
 
 (defvar org-bars-color-options
-  `(:only-one-color nil
-    :bar-color ,(face-attribute 'default :foreground)
+  '(:only-one-color nil
+    :bar-color "#8c8c8c"
     :desaturate-level-faces 30
     :darken-level-faces 15)
   "Plist holding user options related to the colors of the level bars.
