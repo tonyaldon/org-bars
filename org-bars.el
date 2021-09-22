@@ -94,6 +94,7 @@ ORG-OPTIONS is a plist:
 (defun org-bars-pixel-bar (level width &optional only-one-color)
   "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
 
+LEVEL must be an integer verifying, 1 < LEVEL < 8.
 If ONLY-ONE-COLOR is non-nil, LEVEL pixel is replaced by a star *.
 For instance:
     (org-bars-pixel-bar 3 9) -> \"000030000\".
