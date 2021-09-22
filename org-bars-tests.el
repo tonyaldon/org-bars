@@ -123,6 +123,38 @@
   (should (string= (org-bars-pixel-line 2 3 2) "\"010000020000\","))
   (should (string= (org-bars-pixel-line 2 3 3) "\"010000000020000000\",")))
 
+(ert-deftest org-bars-cycle-level-test ()
+  (should (= (org-bars-cycle-level
+              1 '(:org-cycle-level-faces t :org-n-level-faces 3))
+             1))
+  (should (= (org-bars-cycle-level
+              2 '(:org-cycle-level-faces t :org-n-level-faces 3))
+             2))
+  (should (= (org-bars-cycle-level
+              3 '(:org-cycle-level-faces t :org-n-level-faces 3))
+             3))
+  (should (= (org-bars-cycle-level
+              4 '(:org-cycle-level-faces t :org-n-level-faces 3))
+             1))
+  (should (= (org-bars-cycle-level
+              5 '(:org-cycle-level-faces t :org-n-level-faces 3))
+             2))
+  (should (= (org-bars-cycle-level
+              1 '(:org-cycle-level-faces nil :org-n-level-faces 3))
+             1))
+  (should (= (org-bars-cycle-level
+              2 '(:org-cycle-level-faces nil :org-n-level-faces 3))
+             2))
+  (should (= (org-bars-cycle-level
+              3 '(:org-cycle-level-faces nil :org-n-level-faces 3))
+             3))
+  (should (= (org-bars-cycle-level
+              4 '(:org-cycle-level-faces nil :org-n-level-faces 3))
+             3))
+  (should (= (org-bars-cycle-level
+              5 '(:org-cycle-level-faces nil :org-n-level-faces 3))
+             3)))
+
 (ert-deftest org-bars-pixel-bar-test ()
   (should (string= (org-bars-pixel-bar 3 1) "3"))
   (should (string= (org-bars-pixel-bar 3 2) "03"))

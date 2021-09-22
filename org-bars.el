@@ -73,6 +73,24 @@ LEVEL in the org tree."
             none-pixels
             "\",")))
 
+(defun org-bars-cycle-level (level org-options)
+  "Determine the level to pass to `org-bars-pixel-bar'.
+
+ORG-OPTIONS is a plist:
+:org-cycle-level-faces
+    t if we want to cycle level bar color modulo `:org-n-level-faces'.
+    In practice the value of `:org-cycle-level-faces' is
+    `org-cycle-level-faces'.
+:org-n-level-faces
+    an integer between 1 to 8 included corresponding to the
+    number of colors we use in the xpm image.  In practice, the
+    value of `:org-n-level-faces' is `org-n-level-faces'."
+  (let ((cycle-p (plist-get org-options :org-cycle-level-faces))
+        (n-faces (plist-get org-options :org-n-level-faces)))
+    (if cycle-p
+        (if (= (mod level n-faces) 0) n-faces (mod level n-faces))
+      (min level n-faces))))
+
 (defun org-bars-pixel-bar (level width &optional only-one-color)
   "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
 
