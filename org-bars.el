@@ -162,7 +162,7 @@ For instance:
 
 0 <= DESATURATE <= 100 and 0 <= DARKEN <= 100.
 See `color-desaturate-name' and `color-darken-name'."
-  (-> (face-foreground face nil t)
+  (-> (face-foreground face nil 'default)
       (color-desaturate-name desaturate)
       (color-darken-name darken)))
 
