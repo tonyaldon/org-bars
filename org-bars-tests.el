@@ -246,17 +246,19 @@
   (defface org-bars-height-1 '((t :height 1.5)) "" :group 'org-faces)
   (defface org-bars-height-2 '((t :height 0.8)) "" :group 'org-faces)
   (defface org-bars-height-3 '((t :height 200)) "" :group 'org-faces)
+  (defface org-bars-height-4 '((t :foreground "#ff0000")) "" :group 'org-faces) ; we don't specify the height
 
   ;; test `org-bars-face-height' when we don't scale the text.
   (let ((line-spacing nil)
-        face-height-1 face-height-2 face-height-3
-        height-1 height-2 height-3)
+        face-height-1 face-height-2 face-height-3 face-height-4
+        height-1 height-2 height-3 heights-4)
     (with-current-buffer (get-buffer-create "*org-bars-test*")
       (erase-buffer)
       (fundamental-mode)
       (insert (propertize "face-height-1\n" 'face 'org-bars-height-1))
       (insert (propertize "face-height-2\n" 'face 'org-bars-height-2))
-      (insert (propertize "face-height-3\n" 'face 'org-bars-height-3)))
+      (insert (propertize "face-height-3\n" 'face 'org-bars-height-3))
+      (insert (propertize "face-height-4\n" 'face 'org-bars-height-4)))
     ;; we must use `switch-to-buffer' to use `line-pixel-height', it doesn't
     ;; gives the expected result when used inside `with-current-buffer' macro.
     (switch-to-buffer "*org-bars-test*")
@@ -266,26 +268,31 @@
     (setq heights-2 (line-pixel-height))
     (goto-line 3)
     (setq heights-3 (line-pixel-height))
+    (goto-line 4)
+    (setq heights-4 (line-pixel-height))
     (setq face-height-1 (org-bars-face-height 'org-bars-height-1 0))
     (setq face-height-2 (org-bars-face-height 'org-bars-height-2 0))
     (setq face-height-3 (org-bars-face-height 'org-bars-height-3 0))
+    (setq face-height-4 (org-bars-face-height 'org-bars-height-4 0))
     (kill-buffer "*org-bars-test*")
     ;; should forms
     (should (= face-height-1 heights-1))
     (should (= face-height-2 heights-2))
-    (should (= face-height-3 heights-3)))
+    (should (= face-height-3 heights-3))
+    (should (= face-height-4 heights-4)))
 
   ;; test `org-bars-face-height' when we scale the text with `text-scale-increase'
   (let ((text-scale-mode-step 1.2)
         (line-spacing nil)
-        face-height-1 face-height-2 face-height-3
-        heights-1 heights-2 heights-3)
+        face-height-1 face-height-2 face-height-3 face-height-4
+        heights-1 heights-2 heights-3 heights-4)
     (with-current-buffer (get-buffer-create "*org-bars-test*")
       (erase-buffer)
       (fundamental-mode)
       (insert (propertize "face-height-1\n" 'face 'org-bars-height-1))
       (insert (propertize "face-height-2\n" 'face 'org-bars-height-2))
       (insert (propertize "face-height-3\n" 'face 'org-bars-height-3))
+      (insert (propertize "face-height-4\n" 'face 'org-bars-height-4))
       ;; we want to test `org-bars-face-height' after the call
       ;; of the following form
       (text-scale-increase 5))
@@ -298,14 +305,18 @@
       (goto-line 2)
       (setq heights-2 (heights-on-line (line-pixel-height)))
       (goto-line 3)
-      (setq heights-3 (heights-on-line (line-pixel-height))))
+      (setq heights-3 (heights-on-line (line-pixel-height)))
+      (goto-line 4)
+      (setq heights-4 (heights-on-line (line-pixel-height))))
     (setq face-height-1 (org-bars-face-height 'org-bars-height-1 0))
     (setq face-height-2 (org-bars-face-height 'org-bars-height-2 0))
     (setq face-height-3 (org-bars-face-height 'org-bars-height-3 0))
+    (setq face-height-4 (org-bars-face-height 'org-bars-height-4 0))
     (kill-buffer "*org-bars-test*")
     (should (member face-height-1 heights-1))
     (should (member face-height-2 heights-2))
-    (should (member face-height-3 heights-3))))
+    (should (member face-height-3 heights-3))
+    (should (member face-height-4 heights-4))))
 
 ;;; manual tests
 
@@ -427,12 +438,13 @@
   '(org-level-8 ((t (:height 1.0)))))
 
  (custom-set-faces
-  '(org-level-1 ((t (:height 1.0))))
-  '(org-level-2 ((t (:height 1.0))))
-  '(org-level-3 ((t (:height 1.0))))
-  '(org-level-4 ((t (:height 1.0))))
-  '(org-level-5 ((t (:height 1.0))))
-  '(org-level-6 ((t (:height 1.0))))
-  '(org-level-7 ((t (:height 1.0))))
-  '(org-level-8 ((t (:height 1.0)))))
+  ;; we don't specify the height
+  '(org-level-1 ((t :foreground "#ff0000")))
+  '(org-level-2 ((t :foreground "#ff0000")))
+  '(org-level-3 ((t :foreground "#ff0000")))
+  '(org-level-4 ((t :foreground "#ff0000")))
+  '(org-level-5 ((t :foreground "#ff0000")))
+  '(org-level-6 ((t :foreground "#ff0000")))
+  '(org-level-7 ((t :foreground "#ff0000")))
+  '(org-level-8 ((t :foreground "#ff0000"))))
  )

@@ -396,9 +396,10 @@ See `org-bars-face-height', `org-bars-cycle-level-line-height' and
 This function takes care of the cases where the text has
 been scaled up or down with `text-scale-increase' or `text-scale-decrease'."
   (let* ((face-font-height (aref (font-info (face-font face)) 3))
-         (height-is-float-p (floatp (face-attribute face :height nil t)))
+         (height-not-an-integer-p
+          (not (integerp (face-attribute face :height nil t))))
          (scale (nth 2 (assq 'default text-scale-mode-remapping)))
-         (height (cond ((and scale height-is-float-p)
+         (height (cond ((and scale height-not-an-integer-p)
                         (ceiling (* scale face-font-height)))
                        (t face-font-height))))
     (+ height extra-pixels)))
