@@ -227,8 +227,8 @@
    (string= (org-bars-xpm-color-spec '(:only-one-color nil
                                        :desaturate-level-faces 30
                                        :darken-level-faces 15)
-                                      '(:org-n-level-faces 8 ; default org-mode value
-                                        :org-level-faces   (color-level-a color-level-b color-level-c)))
+                                     '(:org-n-level-faces 8 ; default org-mode value
+                                       :org-level-faces   (color-level-a color-level-b color-level-c)))
             (concat "\"1 c #4eea6ed47558\","
                     "\"2 c #840860a45952\","
                     "\"3 c #942563507310\","
@@ -236,8 +236,8 @@
   (should
    (string= (org-bars-xpm-color-spec '(:only-one-color t
                                        :bar-color "#ff0000")
-                                      '(:org-n-level-faces 8 ; default org-mode value
-                                        :org-level-faces   (color-level-a color-level-b color-level-c)))
+                                     '(:org-n-level-faces 8 ; default org-mode value
+                                       :org-level-faces   (color-level-a color-level-b color-level-c)))
             (concat "\"* c #ff0000\","
                     "\"0 c None\","))))
 
