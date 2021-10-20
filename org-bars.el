@@ -51,27 +51,18 @@ ORG-OPTIONS is a plist:
          (end "};"))
     (concat identifier dimensions color-spec raster end)))
 
-(defun org-bars-xpm-dimensions (level width height indentation colors &optional vpadding)
+(defun org-bars-xpm-dimensions (level width height indentation colors)
   "Return the xpm dimensions.
 
 In practice, `org-bars-xpm-dimensions' is called with INDENTATION argument
-value equal to `org-indent-indentation-per-level'.
-
-If VPADDING is non-nil, it corresponds to the number of None pixels
-we add on the top and the bottom of the xpm images.  If the resulting
-HEIGHT + (2*VPADDING) is superior of the line height (of the font)
-where the image is inserted, this visually results in a padding arround
-the line."
+value equal to `org-indent-indentation-per-level'."
   (let ((width-str (number-to-string (* level width indentation)))
-        (heigth-str (number-to-string
-                     (if vpadding (+ (* 2 vpadding) height) height)))
+        (heigth-str (number-to-string height))
         (character-per-pixel "1"))
     (concat "\"" width-str " " heigth-str " "
             (number-to-string colors) " " character-per-pixel "\",")))
 
-;; if we want to add vertical padding to heading line we need
-;; to add one extra left None pixel to every pixel-lines
-(defun org-bars-pixel-line (level width indentation only-one-color &optional org-options) ; maybe add argument: vpadding
+(defun org-bars-pixel-line (level width indentation only-one-color &optional org-options)
   "Return the pixels line for level LEVEL with WIDTH being the character's width.
 
 `org-bars-pixel-line' is used to construct the XPM image
