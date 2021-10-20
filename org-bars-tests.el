@@ -26,6 +26,7 @@
 ;;; Code:
 
 (require 'ert)
+(require 'org-bars)
 
 ;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert t)))
 ;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert "org-bars-xpm-data-test")))
@@ -306,8 +307,73 @@
     (should (member face-height-2 heights-2))
     (should (member face-height-3 heights-3))))
 
+;;; manual tests
 
-(comment ; for manual testing
+(defmacro comment (&rest body) "Ignores body and yield nil." nil)
+
+(comment
+ (let ((width 9)
+       (height 25)
+       (color-options '(:only-one-color nil
+                        :desaturate-level-faces 30
+                        :darken-level-faces 15))
+       (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                      :org-n-level-faces ,org-n-level-faces
+                      :org-level-faces ,org-level-faces)))
+   (insert (propertize " " 'display (org-bars-xpm-image
+                                     1 width height color-options org-options))))
+ (let ((width 9)
+       (height 18)
+       (color-options '(:only-one-color nil
+                        :desaturate-level-faces 30
+                        :darken-level-faces 15))
+       (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                      :org-n-level-faces ,org-n-level-faces
+                      :org-level-faces ,org-level-faces)))
+   (insert (propertize " " 'display (org-bars-xpm-image
+                                     1 width height color-options org-options))))
+ (let ((width 9)
+       (height 18)
+       (color-options '(:only-one-color nil
+                        :desaturate-level-faces 30
+                        :darken-level-faces 15))
+       (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                      :org-n-level-faces ,org-n-level-faces
+                      :org-level-faces ,org-level-faces)))
+   (insert (propertize " " 'display (org-bars-xpm-image
+                                     2 width height color-options org-options))))
+ (let ((width 9)
+       (height 18)
+       (color-options '(:only-one-color nil
+                        :desaturate-level-faces 30
+                        :darken-level-faces 15))
+       (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                      :org-n-level-faces ,org-n-level-faces
+                      :org-level-faces ,org-level-faces)))
+   (insert (propertize " " 'display (org-bars-xpm-image
+                                     3 width height color-options org-options))))
+ (let ((width 9)
+       (height 18)
+       (color-options '(:only-one-color nil
+                        :desaturate-level-faces 30
+                        :darken-level-faces 15))
+       (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                      :org-n-level-faces ,org-n-level-faces
+                      :org-level-faces ,org-level-faces)))
+   (insert (propertize " " 'display (org-bars-xpm-image
+                                     5 width height color-options org-options))))
+ )
+
+(comment
+ (setq org-bars-color-options '(:only-one-color nil
+                                :desaturate-level-faces 30
+                                :darken-level-faces 15))
+ (setq org-bars-color-options '(:only-one-color t
+                                :bar-color "#ff0000"))
+
+ (setq org-bars-extra-pixels-height 6) ; default
+ (setq org-bars-extra-pixels-height 0)
+
  (custom-set-faces
   '(org-bars-star-empty ((t (:foreground "#00ff00"))))
   '(org-bars-star-invisible ((t (:foreground "#ff0000"))))
@@ -320,4 +386,53 @@
 
  (setq org-level-color-stars-only t)
  (setq org-level-color-stars-only nil)
+ (setq org-n-level-faces 8) ; default
+ (setq org-n-level-faces 3)
+ (setq org-cycle-level-faces t) ; default
+ (setq org-cycle-level-faces nil)
+ (setq org-indent-indentation-per-level 2) ; default
+ (setq org-indent-indentation-per-level 1)
+ (setq org-indent-indentation-per-level 3)
+ )
+
+(comment
+ (custom-set-faces
+  '(org-level-1 ((t (:height 200))))
+  '(org-level-2 ((t (:height 180))))
+  '(org-level-3 ((t (:height 150))))
+  '(org-level-4 ((t (:height 110))))
+  '(org-level-5 ((t (:height 110))))
+  '(org-level-6 ((t (:height 110))))
+  '(org-level-7 ((t (:height 110))))
+  '(org-level-8 ((t (:height 110)))))
+
+ (custom-set-faces
+  '(org-level-1 ((t (:height 1.8))))
+  '(org-level-2 ((t (:height 1.4))))
+  '(org-level-3 ((t (:height 1.2))))
+  '(org-level-4 ((t (:height 1.0))))
+  '(org-level-5 ((t (:height 1.0))))
+  '(org-level-6 ((t (:height 1.0))))
+  '(org-level-7 ((t (:height 1.0))))
+  '(org-level-8 ((t (:height 1.0)))))
+
+ (custom-set-faces
+  '(org-level-1 ((t (:height 200))))
+  '(org-level-2 ((t (:height 180))))
+  '(org-level-3 ((t (:height 1.2))))
+  '(org-level-4 ((t (:height 1.2))))
+  '(org-level-5 ((t (:height 1.0))))
+  '(org-level-6 ((t (:height 1.0))))
+  '(org-level-7 ((t (:height 1.0))))
+  '(org-level-8 ((t (:height 1.0)))))
+
+ (custom-set-faces
+  '(org-level-1 ((t (:height 1.0))))
+  '(org-level-2 ((t (:height 1.0))))
+  '(org-level-3 ((t (:height 1.0))))
+  '(org-level-4 ((t (:height 1.0))))
+  '(org-level-5 ((t (:height 1.0))))
+  '(org-level-6 ((t (:height 1.0))))
+  '(org-level-7 ((t (:height 1.0))))
+  '(org-level-8 ((t (:height 1.0)))))
  )
