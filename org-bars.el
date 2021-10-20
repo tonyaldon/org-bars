@@ -356,21 +356,6 @@ This function is meant to be added to `org-cycle-hook'."
     (while (re-search-forward "^\\(\\**\\)\\(\\* \\)" nil t)
       (decompose-region (match-beginning 2) (match-end 2)))))
 
-;;; fix headings
-
-;; the way bitmap are used to display leading stars in headings
-;; (first stars but last one) works well when we use command
-;; `org-promote-subtree' and `org-demote-subtree.'
-;; But when we are after the last stars of the a heading and we
-;; remove it with `backward-delete-char-untabify', the display
-;; with bitmap of the heading is messed up.
-
-(defun org-bars-fix-headings-before-change (start end)
-  "Fix headings display.
-It is meant to be used in `before-change-functions'."
-  (when (org-at-heading-p)
-    (add-text-properties (point-at-bol) (1+ (point-at-eol)) 'display nil)))
-
 ;;; compute prefixes
 
 (defvar org-bars-extra-pixels-height 6
@@ -487,7 +472,6 @@ with an advice."
   :global nil
   (cond
    (org-bars-mode
-    (push 'org-bars-fix-headings-before-change before-change-functions)
     (advice-add 'org-indent--compute-prefixes :override
                 'org-bars-compute-prefixes)
     (advice-add 'org-get-level-face :override
@@ -497,8 +481,6 @@ with an advice."
     (org-indent-mode -1)
     (org-indent-mode 1))
    (t
-    (setq before-change-functions
-          (delq 'org-bars-fix-headings-before-change before-change-functions))
     (advice-remove 'org-indent--compute-prefixes
                    'org-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
