@@ -31,12 +31,6 @@
 ;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert t)))
 ;; (global-set-key (kbd "C-<f1>") (lambda () (interactive)(ert "org-bars-xpm-data-test")))
 
-(comment ; manual test with different org-indent-indentation-per-level
- (setq org-indent-indentation-per-level 1)
- (setq org-indent-indentation-per-level 2)
- (setq org-indent-indentation-per-level 3)
- )
-
 (ert-deftest org-bars-xpm-data-test ()
   (should (string=
            (org-bars-xpm-data 1 3 6
