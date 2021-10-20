@@ -240,30 +240,6 @@ in `org-bars-xpm-color-spec-with-level-faces' function signature."
     darken the colors from the foreground color of the faces
     `org-level-faces'.  See `org-bars-color-level'.")
 
-;;;; comment
-
-(comment ; dotimes, number-sequence, org-bars-xpm-image
- (insert (propertize " " 'display (org-bars-xpm-image 1)))
- (insert (propertize " " 'display (org-bars-xpm-image 2)))
- (insert (propertize " " 'display (org-bars-xpm-image 3)))
- (insert (propertize " " 'display (org-bars-xpm-image 4)))
- (insert (propertize " " 'display (org-bars-xpm-image 5)))
- (insert (propertize " " 'display (org-bars-xpm-image 17)))
-
- (dotimes (l 3) (message "%s" l))
- (number-sequence 1 5); (1 2 3 4 5)
- (number-sequence 1 1); (1)
-
- (s-join (s-repeat 2 "0") '("a" "b")) ; "a00b"
- (let ((none-pixels (s-repeat 2 "0")))
-   (concat (s-join none-pixels '("a" "b")) none-pixels)) ; "a00b00"
-
- (color-desaturate-name "#ff0000" 0) ; "#ffff00000000"
- (color-darken-name "#ff0000" 0) ; "#ffff00000000"
-
- (-take 3 '(a b c d)) ; (a b c)
- )
-
 ;;; font lock stuff for heading lines, org-get-level-face
 
 (defface org-bars-star-empty nil
