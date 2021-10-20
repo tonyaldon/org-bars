@@ -1,6 +1,6 @@
 ;;; org-bars-xpm-image
 
-(defun org-bars-xpm-image (level) ; maybe add arguments: width, heigth, vpadding
+(defun org-bars-xpm-image (level width height color-options org-options)
   "Return an image descriptor for level LEVEL in the org tree.
 
 When `org-bars-mode' is on, the `line-prefix' property
@@ -8,19 +8,10 @@ of each line at the level LEVEL (LEVEL > 0) in the org tree, is set to
 the XPM image produced by `org-bars-xpm-image'.
 
 LEVEL must be strickly superior to 0."
-  (let* ((width 9) ; 9 calculated on my device with fill-column-indicator package
-         (height 18) ; 18 calculated on my device with fill-column-indicator package
-         (color-options '(:only-one-color nil
-                          :desaturate-level-faces 30
-                          :darken-level-faces 15))
-         (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
-                        :org-n-level-faces ,org-n-level-faces
-                        :org-level-faces ,org-level-faces))
-         (data (org-bars-xpm-data level width height color-options org-options)))
-    `(image :type xpm
-            :data ,data
-            :mask heuristic
-            :ascent center)))
+  `(image :type xpm
+          :data ,(org-bars-xpm-data level width height color-options org-options)
+          :mask heuristic
+          :ascent center))
 
 (defun org-bars-xpm-data (level width height color-options org-options)
   "Return xpm data string.
@@ -391,53 +382,111 @@ It is meant to be used in `before-change-functions'."
 
 ;;; compute prefixes
 
+(defvar org-bars-extra-pixels-height 6
+  "Extra vertical pixel added to get continuous bars.
+
+If you don't use different font heights for headlines and
+regular text, you can set `org-bars-extra-pixels-height' to 0.
+
+See `org-bars-face-height', `org-bars-cycle-level-line-height' and
+`org-bars-compute-prefixes'.")
+
+(defun org-bars-face-height (face extra-pixels)
+  "Return height in pixel of the face FACE.
+This function takes care of the cases where the text has
+been scaled up or down with `text-scale-increase' or `text-scale-decrease'."
+  (let* ((face-font-height (aref (font-info (face-font face)) 3))
+         (height-is-float-p (floatp (face-attribute face :height nil t)))
+         (scale (nth 2 (assq 'default text-scale-mode-remapping)))
+         (height (cond ((and scale height-is-float-p)
+                        (ceiling (* scale face-font-height)))
+                       (t face-font-height))))
+    (+ height extra-pixels)))
+
+(defun org-bars-cycle-level-line-height (level extra-pixel org-options)
+  "Determine the line height for each heading line level.
+
+ORG-OPTIONS is a plist:
+:org-cycle-level-faces
+    t if we want to cycle level bar color modulo `:org-n-level-faces'.
+    In practice the value of `:org-cycle-level-faces' is
+    `org-cycle-level-faces'.
+:org-n-level-faces
+    an integer between 1 to 8 included corresponding to the
+    number of faces we take into account in the list `:org-level-faces'.
+    In practice, the value of `:org-n-level-faces' is `org-n-level-faces'.
+:org-level-faces
+    a list of 8 faces.  In practice, the value of `:org-level-faces'
+    is `org-level-faces'."
+  (let ((cycle-p (plist-get org-options :org-cycle-level-faces))
+        (n-faces (plist-get org-options :org-n-level-faces))
+        (faces (plist-get org-options :org-level-faces)))
+    (if cycle-p
+        (org-bars-face-height (nth (% (1- level) n-faces) faces) extra-pixel)
+      (org-bars-face-height (nth (1- (min level n-faces)) faces) extra-pixel))))
+
 (defun org-bars-compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
 
 This function is meant to override `org-indent--compute-prefixes'
 with an advice."
-  ;; -------
-  ;; BEG: part unchanged from `org-indent--compute-prefixes'
-  (setq org-indent--heading-line-prefixes
-        (make-vector org-indent--deepest-level nil))
-  (setq org-indent--inlinetask-line-prefixes
-        (make-vector org-indent--deepest-level nil))
-  (setq org-indent--text-line-prefixes
-        (make-vector org-indent--deepest-level nil))
-  ;; END:
-  ;; -------
-  (dotimes (n org-indent--deepest-level)
-    (let ((indentation (if (<= n 1) 0
-                         (* (1- org-indent-indentation-per-level)
-                            (1- n)))))
-      ;; Headlines line prefixes.
-      (let ((heading-prefix (make-string indentation ?*)))
-        (aset org-indent--heading-line-prefixes
+
+  (setq-local org-indent--heading-line-prefixes
+              (make-vector org-indent--deepest-level nil))
+  (setq-local org-indent--inlinetask-line-prefixes
+              (make-vector org-indent--deepest-level nil))
+  (setq-local org-indent--text-line-prefixes
+              (make-vector org-indent--deepest-level nil))
+
+  (let* ((gc-cons-threshold (max gc-cons-threshold (* 296 800000))) ; 800000 is the default value
+         (width (window-font-width))
+         (height (default-line-height))
+         (color-options org-bars-color-options)
+         (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
+                        :org-cycle-level-faces ,org-cycle-level-faces
+                        :org-n-level-faces ,org-n-level-faces
+                        :org-level-faces ,org-level-faces)))
+    (dotimes (n org-indent--deepest-level)
+      (let ((indentation (if (<= n 1) 0
+                           (* (1- org-indent-indentation-per-level)
+                              (1- n)))))
+        ;; Headlines line prefixes.
+        (let ((heading-prefix (make-string indentation ?*)))
+          (aset org-indent--heading-line-prefixes
+                n
+                (if (<= n 1)
+                    ""
+                  (propertize
+                   " " 'display (org-bars-xpm-image
+                                 (1- n) width
+                                 (org-bars-cycle-level-line-height
+                                  n
+                                  org-bars-extra-pixels-height
+                                  org-options)
+                                 color-options org-options))))
+
+          ;; -------
+          ;; BEG: part unchanged from `org-indent--compute-prefixes'
+          ;; Inline tasks line prefixes
+          (aset org-indent--inlinetask-line-prefixes
+                n
+                (cond ((<= n 1) "")
+                      ((bound-and-true-p org-inlinetask-show-first-star)
+                       (concat org-indent-inlinetask-first-star
+                               (substring heading-prefix 1)))
+                      (t (org-add-props heading-prefix nil 'face 'org-indent))))
+          ;; END:
+          ;; -------
+          )
+
+        ;; Text line prefixes.
+        (aset org-indent--text-line-prefixes
               n
-              (if (<= n 1)
+              (if (= n 0)
                   ""
-                (propertize " " 'display (org-bars-xpm-image (1- n)))))
-
-        ;; -------
-        ;; BEG: part unchanged from `org-indent--compute-prefixes'
-        ;; Inline tasks line prefixes
-        (aset org-indent--inlinetask-line-prefixes
-              n
-              (cond ((<= n 1) "")
-                    ((bound-and-true-p org-inlinetask-show-first-star)
-                     (concat org-indent-inlinetask-first-star
-                             (substring heading-prefix 1)))
-                    (t (org-add-props heading-prefix nil 'face 'org-indent))))
-        ;; END:
-        ;; -------
-        )
-
-      ;; Text line prefixes.
-      (aset org-indent--text-line-prefixes
-            n
-            (if (= n 0)
-                ""
-              (propertize " " 'display (org-bars-xpm-image n)))))))
+                (propertize " " 'display (org-bars-xpm-image
+                                          n width height
+                                          color-options org-options))))))))
 
 ;;; org-bars-mode
 

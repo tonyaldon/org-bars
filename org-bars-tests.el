@@ -241,6 +241,71 @@
             (concat "\"* c #ff0000\","
                     "\"0 c None\","))))
 
+(ert-deftest org-bars-face-height-test ()
+  (defface org-bars-height-1 '((t :height 1.5)) "" :group 'org-faces)
+  (defface org-bars-height-2 '((t :height 0.8)) "" :group 'org-faces)
+  (defface org-bars-height-3 '((t :height 200)) "" :group 'org-faces)
+
+  ;; test `org-bars-face-height' when we don't scale the text.
+  (let ((line-spacing nil)
+        face-height-1 face-height-2 face-height-3
+        height-1 height-2 height-3)
+    (with-current-buffer (get-buffer-create "*org-bars-test*")
+      (erase-buffer)
+      (fundamental-mode)
+      (insert (propertize "face-height-1\n" 'face 'org-bars-height-1))
+      (insert (propertize "face-height-2\n" 'face 'org-bars-height-2))
+      (insert (propertize "face-height-3\n" 'face 'org-bars-height-3)))
+    ;; we must use `switch-to-buffer' to use `line-pixel-height', it doesn't
+    ;; gives the expected result when used inside `with-current-buffer' macro.
+    (switch-to-buffer "*org-bars-test*")
+    (goto-line 1)
+    (setq heights-1 (line-pixel-height))
+    (goto-line 2)
+    (setq heights-2 (line-pixel-height))
+    (goto-line 3)
+    (setq heights-3 (line-pixel-height))
+    (setq face-height-1 (org-bars-face-height 'org-bars-height-1 0))
+    (setq face-height-2 (org-bars-face-height 'org-bars-height-2 0))
+    (setq face-height-3 (org-bars-face-height 'org-bars-height-3 0))
+    (kill-buffer "*org-bars-test*")
+    ;; should forms
+    (should (= face-height-1 heights-1))
+    (should (= face-height-2 heights-2))
+    (should (= face-height-3 heights-3)))
+
+  ;; test `org-bars-face-height' when we scale the text with `text-scale-increase'
+  (let ((text-scale-mode-step 1.2)
+        (line-spacing nil)
+        face-height-1 face-height-2 face-height-3
+        heights-1 heights-2 heights-3)
+    (with-current-buffer (get-buffer-create "*org-bars-test*")
+      (erase-buffer)
+      (fundamental-mode)
+      (insert (propertize "face-height-1\n" 'face 'org-bars-height-1))
+      (insert (propertize "face-height-2\n" 'face 'org-bars-height-2))
+      (insert (propertize "face-height-3\n" 'face 'org-bars-height-3))
+      ;; we want to test `org-bars-face-height' after the call
+      ;; of the following form
+      (text-scale-increase 5))
+    ;; we must use `switch-to-buffer' to use `line-pixel-height'. because
+    ;; its returned value depends on the buffer being displayed.
+    (switch-to-buffer "*org-bars-test*")
+    (cl-flet ((heights-on-line (h) `(,(- h 2) ,(1- h) ,h ,(1+ h) ,(+ h 2))))
+      (goto-line 1)
+      (setq heights-1 (heights-on-line (line-pixel-height)))
+      (goto-line 2)
+      (setq heights-2 (heights-on-line (line-pixel-height)))
+      (goto-line 3)
+      (setq heights-3 (heights-on-line (line-pixel-height))))
+    (setq face-height-1 (org-bars-face-height 'org-bars-height-1 0))
+    (setq face-height-2 (org-bars-face-height 'org-bars-height-2 0))
+    (setq face-height-3 (org-bars-face-height 'org-bars-height-3 0))
+    (kill-buffer "*org-bars-test*")
+    (should (member face-height-1 heights-1))
+    (should (member face-height-2 heights-2))
+    (should (member face-height-3 heights-3))))
+
 
 (comment ; for manual testing
  (custom-set-faces
