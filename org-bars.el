@@ -465,6 +465,14 @@ with an advice."
                                           n width height
                                           color-options org-options))))))))
 
+(defun org-bars-indent (&rest r)
+  "Indent current buffer with recomputed xpm image prefixes.
+
+This is meant to be used as advice of `text-scale-increase'."
+  (when org-bars-mode
+    (org-bars-compute-prefixes)
+    (org-with-wide-buffer (org-indent-indent-buffer))))
+
 ;;; org-bars-mode
 
 (define-minor-mode org-bars-mode
@@ -472,6 +480,7 @@ with an advice."
   :global nil
   (cond
    (org-bars-mode
+    (advice-add 'text-scale-increase :after 'org-bars-indent)
     (advice-add 'org-indent--compute-prefixes :override
                 'org-bars-compute-prefixes)
     (advice-add 'org-get-level-face :override
@@ -481,6 +490,7 @@ with an advice."
     (org-indent-mode -1)
     (org-indent-mode 1))
    (t
+    (advice-remove 'text-scale-increase 'org-bars-indent)
     (advice-remove 'org-indent--compute-prefixes
                    'org-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
