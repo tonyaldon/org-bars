@@ -36,11 +36,14 @@ And a bit more.
 
 a super long line to test ~line-wrap~ text property.  a super long line to test ~line-wrap~ text property. a super long line  to test ~line-wrap~ text property.
 
-
 a super long line to test ~line-wrap~ text property.  a super long line to test ~line-wrap~ text property. a super long line to test ~line-wrap~ text property.
 
-
 *** 1.4.3 heading
+
+#+BEGIN_SRC emacs-lisp
+(message "narrowing stuff")
+#+END_SRC
+
 ** 1.5 heading
 * 2. heading
 ** 2.1 heading

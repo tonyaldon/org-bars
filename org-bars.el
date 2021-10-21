@@ -473,6 +473,36 @@ This is meant to be used as advice of `text-scale-increase'."
     (org-bars-compute-prefixes)
     (org-with-wide-buffer (org-indent-indent-buffer))))
 
+;;; narrowing
+
+(defvar-local org-bars-narrow-marker nil)
+
+(defun org-bars-narrow ()
+  "Remove bars that are not part of the buffer when narrowed.
+
+Restore the bars when the buffer is widen.
+
+This is meant to be used in `post-command-hook'."
+  (cond
+   ((buffer-narrowed-p)
+    (when (member this-command
+                  '(org-toggle-narrow-to-subtree
+                    org-narrow-to-block org-narrow-to-element
+                    org-narrow-to-subtree narrow-to-region narrow-to-defun
+                    narrow-to-page narrow-to-defun-include-comments))
+      (setq-local org-bars-narrow-marker (point-max-marker)))
+    (let* ((pmax (point-max))
+           (pmax+ (1+ (point-max))))
+      (org-with-wide-buffer
+       (when (< pmax (point-max))
+         (org-indent-remove-properties pmax pmax+)))))
+   ((member this-command '(widen org-toggle-narrow-to-subtree))
+    (let ((marker+ (save-excursion
+                     (goto-char org-bars-narrow-marker)
+                     (line-beginning-position 3))))
+      (org-indent-refresh-maybe org-bars-narrow-marker marker+ nil))
+    (setq-local org-bars-narrow-marker nil))))
+
 ;;; org-bars-mode
 
 (define-minor-mode org-bars-mode
@@ -480,6 +510,7 @@ This is meant to be used as advice of `text-scale-increase'."
   :global nil
   (cond
    (org-bars-mode
+    (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
     (advice-add 'text-scale-increase :after 'org-bars-indent)
     (advice-add 'org-indent--compute-prefixes :override
                 'org-bars-compute-prefixes)
@@ -490,6 +521,7 @@ This is meant to be used as advice of `text-scale-increase'."
     (org-indent-mode -1)
     (org-indent-mode 1))
    (t
+    (remove-hook 'post-command-hook 'org-bars-narrow 'local)
     (advice-remove 'text-scale-increase 'org-bars-indent)
     (advice-remove 'org-indent--compute-prefixes
                    'org-bars-compute-prefixes)
