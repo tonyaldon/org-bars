@@ -22,7 +22,7 @@ your init file:
 4. `org-level-faces`.
 
 If you want all the bars to have the same color, for instance
-the color `"#8c8c8c"`, set the variable `org-bars-color-options`
+the color `#8c8c8c`, set the variable `org-bars-color-options`
 like this:
 
 ```
@@ -61,7 +61,7 @@ variable `org-bars-stars` as follow:
                        :visible "-"))
 ```
 
-If you prefer the stars to have a different faces than the headlines
+If you prefer the stars to have different faces than the headlines
 faces, you can do it by setting the faces `org-bars-star-empty`,
 `org-bars-star-invisible` and `org-bars-star-visible` as shown below:
 
@@ -76,7 +76,7 @@ This is not specific to `org-bars-mode`, but since `org-bars-mode`
 update the heading stars when the visibility changes (see:
 `org-bars-refresh-stars` function), you might want to not use the
 ellipsis `...` at the end of the folded headlines.  You can do this
-adding this code snippet to your init file:
+by adding this code snippet to your init file:
 
 ```elisp
 (defun org-no-ellipsis-in-headlines ()
@@ -105,17 +105,17 @@ get inbuffer code completion, you must use [company-posframe](https://github.com
 Indeed, `org-bars-mode` uses images on the `line-prefix` properties
 and this makes the text in the company tooltip not aligned.
 
-This is normal that `company-mode` doesn't cover this unusual case,
-but as `company-posframe` uses child frame as tooltip (and not
-overlay) everything is ok.
+`company-mode` doesn't cover this unusual case but as
+`company-posframe` uses child frame as tooltip (and not overlay)
+everything is ok.
 
 # limitations
 
 1. `org-bars-mode` doesn't work on display that can't display images.
 2. If you use `face-remap-add-relative` to set the faces of the
-   headlines (ie. `org-level-1`, ..., `org-level-8`), due to how the
+   headlines (`org-level-1`, ..., `org-level-8`), due to how the
    height of those faces is calculated to produce the XPM images put
    in the `line-prefix` and `wrap-prefix` text properties of the
    buffer, **this won't work correctly**, and the bars might not be
    continuous.
-3. `org-inlinetask` seems to work but is not yet covered correctly.
+3. `org-inlinetask` seems to work but has not yet been covered properly.
