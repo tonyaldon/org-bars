@@ -200,11 +200,7 @@ in `org-bars-xpm-color-spec-with-level-faces' function signature."
                                                 (or darken 0)
                                                 org-options))))
 
-(defvar org-bars-color-options
-  '(:only-one-color nil
-    :bar-color "#8c8c8c"
-    :desaturate-level-faces 30
-    :darken-level-faces 15)
+(defvar org-bars-color-options '(:only-one-color nil)
   "Plist holding user options related to the colors of the level bars.
 
 :only-one-color
@@ -251,9 +247,9 @@ See `face-nontrivial-p', `org-bars-subtree-is-empty-p' and
   :group 'org-faces)
 
 (defvar org-bars-stars
-  '(:empty "*"
-    :invisible "+"
-    :visible "-")
+  '(:empty "◉"
+    :invisible "▶"
+    :visible "▼")
   "Plist of the strings used in place of the star \"* \" in heading lines.
 The replacement star is choosen accordingly to the state of the subtree:
 :empty

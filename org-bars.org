@@ -7,7 +7,7 @@
 ***** 1.1.1.1.1 heading
 ****** 1.1.1.1.1.1 heading
 ******* 1.1.1.1.1.1.1 heading
-** 1.2 heading (aref (font-info (face-font 'org-level-2)) 3)
+** 1.2 heading
 *** 1.2.1 heading
 
 Some text.
