@@ -522,6 +522,9 @@ This is meant to be used in `post-command-hook'."
 
 ;;; org-bars-mode
 
+(defvar-local org-bars-org-indent-mode nil
+  "Hold the value of `org-indent-mode' before turning `org-bars-mode' on.")
+
 (define-minor-mode org-bars-mode
   "Toggle `org-bars-mode' mode on or off."
   :global nil
@@ -541,6 +544,7 @@ This is meant to be used in `post-command-hook'."
                   'org-bars-get-level-face)
       (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
       (add-to-invisibility-spec '(org-bars))
+      (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
       (org-indent-mode -1)
       (org-indent-mode 1)))
    (t
@@ -555,6 +559,5 @@ This is meant to be used in `post-command-hook'."
     (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
     (org-bars-remove-replacement-stars)
     (remove-from-invisibility-spec '(org-bars))
-    (org-indent-mode -1))))
-
-(global-set-key (kbd "C-<f2>") 'org-bars-mode)
+    (org-indent-mode -1)
+    (if org-bars-org-indent-mode (org-indent-mode 1)))))
