@@ -334,7 +334,7 @@ This function is meant to override `org-get-level-face' with an advice."
         (if (face-nontrivial-p star-f) star-f org-f)))
      (t (unless org-level-color-stars-only org-f)))))
 
-(defun org-bars-refresh-stars (state)
+(defun org-bars-refresh-stars (_state)
   "Refontify all visible heading stars each time `org-cycle' command is used.
 
 This function is meant to be added to `org-cycle-hook'."
@@ -461,7 +461,7 @@ with an advice."
                                           n width height
                                           color-options org-options))))))))
 
-(defun org-bars-indent (&rest r)
+(defun org-bars-indent (&rest _r)
   "Indent current buffer with recomputed xpm image prefixes.
 
 This is meant to be used as advice of `text-scale-increase'."
@@ -469,7 +469,7 @@ This is meant to be used as advice of `text-scale-increase'."
     (org-bars-compute-prefixes)
     (org-with-wide-buffer (org-indent-indent-buffer))))
 
-(defun org-bars-set-line-properties (level indentation &optional heading)
+(defun org-bars-set-line-properties (level _indentation &optional heading)
   "Set prefix properties on current line an move to next one.
 
 This function is meant to override `org-indent-set-line-properties'
