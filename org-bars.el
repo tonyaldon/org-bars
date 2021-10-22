@@ -1,143 +1,22 @@
 ;;; compute XPM image data (virtual bars)
 
-(defun org-bars-xpm-image (level width height color-options org-options)
-  "Return an image descriptor for level LEVEL in the org tree.
+(defvar org-bars-color-options '(:only-one-color nil)
+  "Plist holding user options related to the colors of the level bars.
 
-When `org-bars-mode' is on, the `line-prefix' property
-of each line at the level LEVEL (LEVEL > 0) in the org tree, is set to
-the XPM image produced by `org-bars-xpm-image'.
-
-LEVEL must be strickly superior to 0."
-  `(image :type xpm
-          :data ,(org-bars-xpm-data level width height color-options org-options)
-          :mask heuristic
-          :ascent center))
-
-(defun org-bars-xpm-data (level width height color-options org-options)
-  "Return xpm data string.
-
-COLOR-OPTIONS is a plist with the same specification as
-`org-bars-color-options' variable.
-
-ORG-OPTIONS is a plist:
-:org-indent-indentation-per-level
-    an integer >= 1 that represent the indentation per level in number
-    of characters.  In practice the value of `:org-indent-indentation-per-level'
-    is `org-indent-indentation-per-level'.
-:org-cycle-level-faces
-    t if we want to cycle level bar color modulo `:org-n-level-faces'.
-    In practice the value of `:org-cycle-level-faces' is
-    `org-cycle-level-faces'.
-:org-n-level-faces
-    an integer between 1 to 8 included corresponding to the
-    number of colors we use in the xpm image.  In practice, the
-    value of `:org-n-level-faces' is `org-n-level-faces'.
-:org-level-faces
-    a list of 8 faces.  In practice, the value of `:org-level-faces'
-    is `org-level-faces'.  In xpm color specification 1 to 8
-    correspond to modified colors from the foreground colors
-    of the 8 faces of `:org-level-faces'.  If `:org-n-level-faces' < 8,
-    we only use the first `:org-n-level-faces' faces of `:org-level-faces'
-    in the xpm specification."
-  (let* ((identifier "/* XPM */\nstatic char *rule[] = {")
-         (only-one-color-p (plist-get color-options :only-one-color))
-         (n-faces (plist-get org-options :org-n-level-faces))
-         (colors (if only-one-color-p 2 (1+ n-faces)))
-         (indentation (plist-get org-options :org-indent-indentation-per-level))
-         (dimensions (org-bars-xpm-dimensions level width height indentation colors))
-         (color-spec (org-bars-xpm-color-spec color-options org-options))
-         (pixel-line (org-bars-pixel-line level width indentation only-one-color-p org-options))
-         (raster (-reduce #'concat (-repeat height pixel-line)))
-         (end "};"))
-    (concat identifier dimensions color-spec raster end)))
-
-(defun org-bars-xpm-dimensions (level width height indentation colors)
-  "Return the xpm dimensions.
-
-In practice, `org-bars-xpm-dimensions' is called with INDENTATION argument
-value equal to `org-indent-indentation-per-level'."
-  (let ((width-str (number-to-string (* level width indentation)))
-        (heigth-str (number-to-string height))
-        (character-per-pixel "1"))
-    (concat "\"" width-str " " heigth-str " "
-            (number-to-string colors) " " character-per-pixel "\",")))
-
-(defun org-bars-pixel-line (level width indentation only-one-color &optional org-options)
-  "Return the pixels line for level LEVEL with WIDTH being the character's width.
-
-`org-bars-pixel-line' is used to construct the XPM image
-used as `line-prefix' text property for each line for the level
-LEVEL in the org tree.  See `org-bars-xpm-data'.
-
-WIDTH * (INDENTATION - 1) corresponds to the number of None pixels we add
-after each level bar.  In practice, `org-bars-pixel-line' is called
-with INDENTATION argument value equal to `org-indent-indentation-per-level'.
-
-ORG-OPTIONS is a plist:
-:org-cycle-level-faces
-    t if we want to cycle level bar color modulo `:org-n-level-faces'.
-    In practice the value of `:org-cycle-level-faces' is
-    `org-cycle-level-faces'.
-:org-n-level-faces
-    an integer between 1 to 8 included corresponding to the
-    number of colors we use in the xpm image.  In practice, the
-    value of `:org-n-level-faces' is `org-n-level-faces'.
-
-See `org-bars-cycle-level'."
-  (let ((none-pixels (s-repeat (* (1- indentation) width) "0")))
-    (concat "\""
-            (s-join none-pixels
-                    (--map (org-bars-pixel-bar
-                            (or (and only-one-color 1)
-                                (org-bars-cycle-level it org-options))
-                            width only-one-color)
-                           (number-sequence 1 level)))
-            none-pixels
-            "\",")))
-
-(defun org-bars-cycle-level (level org-options)
-  "Determine the level to pass to `org-bars-pixel-bar'.
-
-ORG-OPTIONS is a plist:
-:org-cycle-level-faces
-    t if we want to cycle level bar color modulo `:org-n-level-faces'.
-    In practice the value of `:org-cycle-level-faces' is
-    `org-cycle-level-faces'.
-:org-n-level-faces
-    an integer between 1 to 8 included corresponding to the
-    number of colors we use in the xpm image.  In practice, the
-    value of `:org-n-level-faces' is `org-n-level-faces'."
-  (let ((cycle-p (plist-get org-options :org-cycle-level-faces))
-        (n-faces (plist-get org-options :org-n-level-faces)))
-    (if cycle-p
-        (if (= (mod level n-faces) 0) n-faces (mod level n-faces))
-      (min level n-faces))))
-
-(defun org-bars-pixel-bar (level width &optional only-one-color)
-  "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
-
-LEVEL must be an integer verifying, 1 < LEVEL < 8.
-If ONLY-ONE-COLOR is non-nil, LEVEL pixel is replaced by a star *.
-For instance:
-    (org-bars-pixel-bar 3 9) -> \"000030000\".
-    (org-bars-pixel-bar 3 9 t) -> \"0000*0000\"."
-  (cond
-   ((= width 1) (or (and only-one-color "*")
-                    (number-to-string level)))
-   ((= width 2) (concat "0" (or (and only-one-color "*")
-                                (number-to-string level))))
-   ((= (mod width 2) 1)
-    (concat (s-repeat (floor (/ width 2.0)) "0")
-            (or (and only-one-color "*")
-                (number-to-string level))
-            (s-repeat (floor (/ width 2.0)) "0")))
-   (t
-    (let* ((l-pixels (floor (/ width 2.0)))
-           (r-pixels (1- l-pixels)))
-      (concat (s-repeat l-pixels "0")
-              (or (and only-one-color "*")
-                  (number-to-string level))
-              (s-repeat r-pixels "0"))))))
+:only-one-color
+    If t, the level bars have the color `:bar-color'.
+    If nil, the level bars inherit the color of the foreground faces
+    of the heading lines.  See `org-level-faces'.
+:bar-color
+    If `:only-one-color' is non-nil, use this color for the level bars.
+:desaturate-level-faces
+    If `:only-one-color' is nil, apply this number (0 to 100) to
+    desaturate the colors from the foreground color of the faces
+    `org-level-faces'.  See `org-bars-color-level'.
+:darken-level-faces
+    If `:only-one-color' is nil, apply this number (0 to 100) to
+    darken the colors from the foreground color of the faces
+    `org-level-faces'.  See `org-bars-color-level'.")
 
 (defun org-bars-color-level (face desaturate darken)
   "Desaturate and darken foreground color of FACE.
@@ -200,23 +79,144 @@ in `org-bars-xpm-color-spec-with-level-faces' function signature."
                                                 (or darken 0)
                                                 org-options))))
 
-(defvar org-bars-color-options '(:only-one-color nil)
-  "Plist holding user options related to the colors of the level bars.
+(defun org-bars-xpm-dimensions (level width height indentation colors)
+  "Return the xpm dimensions.
 
-:only-one-color
-    If t, the level bars have the color `:bar-color'.
-    If nil, the level bars inherit the color of the foreground faces
-    of the heading lines.  See `org-level-faces'.
-:bar-color
-    If `:only-one-color' is non-nil, use this color for the level bars.
-:desaturate-level-faces
-    If `:only-one-color' is nil, apply this number (0 to 100) to
-    desaturate the colors from the foreground color of the faces
-    `org-level-faces'.  See `org-bars-color-level'.
-:darken-level-faces
-    If `:only-one-color' is nil, apply this number (0 to 100) to
-    darken the colors from the foreground color of the faces
-    `org-level-faces'.  See `org-bars-color-level'.")
+In practice, `org-bars-xpm-dimensions' is called with INDENTATION argument
+value equal to `org-indent-indentation-per-level'."
+  (let ((width-str (number-to-string (* level width indentation)))
+        (heigth-str (number-to-string height))
+        (character-per-pixel "1"))
+    (concat "\"" width-str " " heigth-str " "
+            (number-to-string colors) " " character-per-pixel "\",")))
+
+(defun org-bars-cycle-level (level org-options)
+  "Determine the level to pass to `org-bars-pixel-bar'.
+
+ORG-OPTIONS is a plist:
+:org-cycle-level-faces
+    t if we want to cycle level bar color modulo `:org-n-level-faces'.
+    In practice the value of `:org-cycle-level-faces' is
+    `org-cycle-level-faces'.
+:org-n-level-faces
+    an integer between 1 to 8 included corresponding to the
+    number of colors we use in the xpm image.  In practice, the
+    value of `:org-n-level-faces' is `org-n-level-faces'."
+  (let ((cycle-p (plist-get org-options :org-cycle-level-faces))
+        (n-faces (plist-get org-options :org-n-level-faces)))
+    (if cycle-p
+        (if (= (mod level n-faces) 0) n-faces (mod level n-faces))
+      (min level n-faces))))
+
+(defun org-bars-pixel-bar (level width &optional only-one-color)
+  "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
+
+LEVEL must be an integer verifying, 1 < LEVEL < 8.
+If ONLY-ONE-COLOR is non-nil, LEVEL pixel is replaced by a star *.
+For instance:
+    (org-bars-pixel-bar 3 9) -> \"000030000\".
+    (org-bars-pixel-bar 3 9 t) -> \"0000*0000\"."
+  (cond
+   ((= width 1) (or (and only-one-color "*")
+                    (number-to-string level)))
+   ((= width 2) (concat "0" (or (and only-one-color "*")
+                                (number-to-string level))))
+   ((= (mod width 2) 1)
+    (concat (s-repeat (floor (/ width 2.0)) "0")
+            (or (and only-one-color "*")
+                (number-to-string level))
+            (s-repeat (floor (/ width 2.0)) "0")))
+   (t
+    (let* ((l-pixels (floor (/ width 2.0)))
+           (r-pixels (1- l-pixels)))
+      (concat (s-repeat l-pixels "0")
+              (or (and only-one-color "*")
+                  (number-to-string level))
+              (s-repeat r-pixels "0"))))))
+
+(defun org-bars-pixel-line (level width indentation only-one-color &optional org-options)
+  "Return the pixels line for level LEVEL with WIDTH being the character's width.
+
+`org-bars-pixel-line' is used to construct the XPM image
+used as `line-prefix' text property for each line for the level
+LEVEL in the org tree.  See `org-bars-xpm-data'.
+
+WIDTH * (INDENTATION - 1) corresponds to the number of None pixels we add
+after each level bar.  In practice, `org-bars-pixel-line' is called
+with INDENTATION argument value equal to `org-indent-indentation-per-level'.
+
+ORG-OPTIONS is a plist:
+:org-cycle-level-faces
+    t if we want to cycle level bar color modulo `:org-n-level-faces'.
+    In practice the value of `:org-cycle-level-faces' is
+    `org-cycle-level-faces'.
+:org-n-level-faces
+    an integer between 1 to 8 included corresponding to the
+    number of colors we use in the xpm image.  In practice, the
+    value of `:org-n-level-faces' is `org-n-level-faces'.
+
+See `org-bars-cycle-level'."
+  (let ((none-pixels (s-repeat (* (1- indentation) width) "0")))
+    (concat "\""
+            (s-join none-pixels
+                    (--map (org-bars-pixel-bar
+                            (or (and only-one-color 1)
+                                (org-bars-cycle-level it org-options))
+                            width only-one-color)
+                           (number-sequence 1 level)))
+            none-pixels
+            "\",")))
+
+(defun org-bars-xpm-data (level width height color-options org-options)
+  "Return xpm data string.
+
+COLOR-OPTIONS is a plist with the same specification as
+`org-bars-color-options' variable.
+
+ORG-OPTIONS is a plist:
+:org-indent-indentation-per-level
+    an integer >= 1 that represent the indentation per level in number
+    of characters.  In practice the value of `:org-indent-indentation-per-level'
+    is `org-indent-indentation-per-level'.
+:org-cycle-level-faces
+    t if we want to cycle level bar color modulo `:org-n-level-faces'.
+    In practice the value of `:org-cycle-level-faces' is
+    `org-cycle-level-faces'.
+:org-n-level-faces
+    an integer between 1 to 8 included corresponding to the
+    number of colors we use in the xpm image.  In practice, the
+    value of `:org-n-level-faces' is `org-n-level-faces'.
+:org-level-faces
+    a list of 8 faces.  In practice, the value of `:org-level-faces'
+    is `org-level-faces'.  In xpm color specification 1 to 8
+    correspond to modified colors from the foreground colors
+    of the 8 faces of `:org-level-faces'.  If `:org-n-level-faces' < 8,
+    we only use the first `:org-n-level-faces' faces of `:org-level-faces'
+    in the xpm specification."
+  (let* ((identifier "/* XPM */\nstatic char *rule[] = {")
+         (only-one-color-p (plist-get color-options :only-one-color))
+         (n-faces (plist-get org-options :org-n-level-faces))
+         (colors (if only-one-color-p 2 (1+ n-faces)))
+         (indentation (plist-get org-options :org-indent-indentation-per-level))
+         (dimensions (org-bars-xpm-dimensions level width height indentation colors))
+         (color-spec (org-bars-xpm-color-spec color-options org-options))
+         (pixel-line (org-bars-pixel-line level width indentation only-one-color-p org-options))
+         (raster (-reduce #'concat (-repeat height pixel-line)))
+         (end "};"))
+    (concat identifier dimensions color-spec raster end)))
+
+(defun org-bars-xpm-image (level width height color-options org-options)
+  "Return an image descriptor for level LEVEL in the org tree.
+
+When `org-bars-mode' is on, the `line-prefix' property
+of each line at the level LEVEL (LEVEL > 0) in the org tree, is set to
+the XPM image produced by `org-bars-xpm-image'.
+
+LEVEL must be strickly superior to 0."
+  `(image :type xpm
+          :data ,(org-bars-xpm-data level width height color-options org-options)
+          :mask heuristic
+          :ascent center))
 
 ;;; manage stars and headlines faces
 
