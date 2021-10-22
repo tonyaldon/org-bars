@@ -1,4 +1,4 @@
-;;; org-bars-xpm-image
+;;; compute XPM image data (virtual bars)
 
 (defun org-bars-xpm-image (level width height color-options org-options)
   "Return an image descriptor for level LEVEL in the org tree.
@@ -218,7 +218,7 @@ in `org-bars-xpm-color-spec-with-level-faces' function signature."
     darken the colors from the foreground color of the faces
     `org-level-faces'.  See `org-bars-color-level'.")
 
-;;; font lock stuff for heading lines, org-get-level-face
+;;; manage stars and headlines faces
 
 (defface org-bars-star-empty nil
   "If non trivial, this is the face used for the heading star
@@ -250,7 +250,7 @@ See `face-nontrivial-p', `org-bars-subtree-is-empty-p' and
   '(:empty "◉"
     :invisible "▶"
     :visible "▼")
-  "Plist of the strings used in place of the star \"* \" in heading lines.
+  "Plist of the strings used in place of the last star \"*\" in headlines.
 The replacement star is choosen accordingly to the state of the subtree:
 :empty
     if the subtree is empty (see `org-bars-subtree-is-empty-p'),
@@ -352,7 +352,7 @@ This function is meant to be added to `org-cycle-hook'."
     (while (re-search-forward "^\\(\\**\\)\\(\\* \\)" nil t)
       (decompose-region (match-beginning 2) (match-end 2)))))
 
-;;; compute prefixes
+;;; compute prefixes text properties
 
 (defvar org-bars-extra-pixels-height 6
   "Extra vertical pixel added to get continuous bars.
