@@ -112,17 +112,17 @@
                       level width height indentation colors)
                      "\"27 12 4 1\","))))
 
-(ert-deftest org-bars-pixel-line-test ()
-  (should (string= (org-bars-pixel-line 6 3 1 nil '(:org-cycle-level-faces t
-                                                    :org-n-level-faces 3))
+(ert-deftest org-bars-pixel-bar-test ()
+  (should (string= (org-bars-pixel-bar 6 3 1 nil '(:org-cycle-level-faces t
+                                                   :org-n-level-faces 3))
                    "\"010020030010020030\","))
-  (should (string= (org-bars-pixel-line 6 3 1 nil '(:org-cycle-level-faces nil
-                                                    :org-n-level-faces 3))
+  (should (string= (org-bars-pixel-bar 6 3 1 nil '(:org-cycle-level-faces nil
+                                                   :org-n-level-faces 3))
                    "\"010020030030030030\","))
-  (should (string= (org-bars-pixel-line 6 3 1 'only-one-color) "\"0*00*00*00*00*00*0\","))
-  (should (string= (org-bars-pixel-line 2 3 1 'only-one-color) "\"0*00*0\","))
-  (should (string= (org-bars-pixel-line 2 3 2 'only-one-color) "\"0*00000*0000\","))
-  (should (string= (org-bars-pixel-line 2 3 3 'only-one-color) "\"0*00000000*0000000\",")))
+  (should (string= (org-bars-pixel-bar 6 3 1 'only-one-color) "\"0*00*00*00*00*00*0\","))
+  (should (string= (org-bars-pixel-bar 2 3 1 'only-one-color) "\"0*00*0\","))
+  (should (string= (org-bars-pixel-bar 2 3 2 'only-one-color) "\"0*00000*0000\","))
+  (should (string= (org-bars-pixel-bar 2 3 3 'only-one-color) "\"0*00000000*0000000\",")))
 
 (ert-deftest org-bars-cycle-level-test ()
   (should (= (org-bars-cycle-level

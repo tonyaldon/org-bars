@@ -134,15 +134,15 @@ For instance:
                   (number-to-string level))
               (s-repeat r-pixels "0"))))))
 
-(defun org-bars-pixel-line (level width indentation only-one-color &optional org-options)
-  "Return the pixels line for level LEVEL with WIDTH being the character's width.
+(defun org-bars-pixel-bar (level width indentation only-one-color &optional org-options)
+  "Return the pixels bars for level LEVEL with WIDTH being the character's width.
 
-`org-bars-pixel-line' is used to construct the XPM image
+`org-bars-pixel-bar' is used to construct the XPM image
 used as `line-prefix' text property for each line for the level
 LEVEL in the org tree.  See `org-bars-xpm-data'.
 
 WIDTH * (INDENTATION - 1) corresponds to the number of None pixels we add
-after each level bar.  In practice, `org-bars-pixel-line' is called
+after each level bar.  In practice, `org-bars-pixel-bar' is called
 with INDENTATION argument value equal to `org-indent-indentation-per-level'.
 
 ORG-OPTIONS is a plist:
@@ -200,8 +200,8 @@ ORG-OPTIONS is a plist:
          (indentation (plist-get org-options :org-indent-indentation-per-level))
          (dimensions (org-bars-xpm-dimensions level width height indentation colors))
          (color-spec (org-bars-xpm-color-spec color-options org-options))
-         (pixel-line (org-bars-pixel-line level width indentation only-one-color-p org-options))
-         (raster (-reduce #'concat (-repeat height pixel-line)))
+         (pixel-bar (org-bars-pixel-bar level width indentation only-one-color-p org-options))
+         (raster (-reduce #'concat (-repeat height pixel-bar)))
          (end "};"))
     (concat identifier dimensions color-spec raster end)))
 
