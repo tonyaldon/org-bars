@@ -473,6 +473,23 @@ This is meant to be used as advice of `text-scale-increase'."
     (org-bars-compute-prefixes)
     (org-with-wide-buffer (org-indent-indent-buffer))))
 
+(defun org-bars-set-line-properties (level indentation &optional heading)
+  "Set prefix properties on current line an move to next one.
+
+This function is meant to override `org-indent-set-line-properties'
+with an advice.  Read it docstring for more details."
+  (let* ((prefix
+          (aref (pcase heading
+                  (`nil org-indent--text-line-prefixes)
+                  (`inlinetask org-indent--inlinetask-line-prefixes)
+                  (_ org-indent--heading-line-prefixes))
+                level)))
+    ;; Add properties down to the next line to indent empty lines.
+    (add-text-properties (line-beginning-position)
+                         (line-beginning-position 2)
+                         `(line-prefix ,prefix wrap-prefix ,prefix)))
+  (forward-line))
+
 ;;; narrowing
 
 (defvar-local org-bars-narrow-marker nil)
@@ -512,6 +529,8 @@ This is meant to be used in `post-command-hook'."
    (org-bars-mode
     (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
     (advice-add 'text-scale-increase :after 'org-bars-indent)
+    (advice-add 'org-indent-set-line-properties :override
+                'org-bars-set-line-properties)
     (advice-add 'org-indent--compute-prefixes :override
                 'org-bars-compute-prefixes)
     (advice-add 'org-get-level-face :override
@@ -523,6 +542,8 @@ This is meant to be used in `post-command-hook'."
    (t
     (remove-hook 'post-command-hook 'org-bars-narrow 'local)
     (advice-remove 'text-scale-increase 'org-bars-indent)
+    (advice-remove 'org-indent-set-line-properties
+                   'org-bars-set-line-properties)
     (advice-remove 'org-indent--compute-prefixes
                    'org-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
