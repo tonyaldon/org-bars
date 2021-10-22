@@ -91,7 +91,7 @@ value equal to `org-indent-indentation-per-level'."
             (number-to-string colors) " " character-per-pixel "\",")))
 
 (defun org-bars-cycle-level (level org-options)
-  "Determine the level to pass to `org-bars-pixel-bar'.
+  "Determine the level to pass to `org-bars-pixel-hline'.
 
 ORG-OPTIONS is a plist:
 :org-cycle-level-faces
@@ -108,14 +108,14 @@ ORG-OPTIONS is a plist:
         (if (= (mod level n-faces) 0) n-faces (mod level n-faces))
       (min level n-faces))))
 
-(defun org-bars-pixel-bar (level width &optional only-one-color)
+(defun org-bars-pixel-hline (level width &optional only-one-color)
   "Return WIDTH pixels equal to 0 but one centered equal to LEVEL.
 
 LEVEL must be an integer verifying, 1 < LEVEL < 8.
 If ONLY-ONE-COLOR is non-nil, LEVEL pixel is replaced by a star *.
 For instance:
-    (org-bars-pixel-bar 3 9) -> \"000030000\".
-    (org-bars-pixel-bar 3 9 t) -> \"0000*0000\"."
+    (org-bars-pixel-hline 3 9) -> \"000030000\".
+    (org-bars-pixel-hline 3 9 t) -> \"0000*0000\"."
   (cond
    ((= width 1) (or (and only-one-color "*")
                     (number-to-string level)))
@@ -159,7 +159,7 @@ See `org-bars-cycle-level'."
   (let ((none-pixels (s-repeat (* (1- indentation) width) "0")))
     (concat "\""
             (s-join none-pixels
-                    (--map (org-bars-pixel-bar
+                    (--map (org-bars-pixel-hline
                             (or (and only-one-color 1)
                                 (org-bars-cycle-level it org-options))
                             width only-one-color)
