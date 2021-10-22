@@ -527,18 +527,22 @@ This is meant to be used in `post-command-hook'."
   :global nil
   (cond
    (org-bars-mode
-    (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
-    (advice-add 'text-scale-increase :after 'org-bars-indent)
-    (advice-add 'org-indent-set-line-properties :override
-                'org-bars-set-line-properties)
-    (advice-add 'org-indent--compute-prefixes :override
-                'org-bars-compute-prefixes)
-    (advice-add 'org-get-level-face :override
-                'org-bars-get-level-face)
-    (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
-    (add-to-invisibility-spec '(org-bars-invisible))
-    (org-indent-mode -1)
-    (org-indent-mode 1))
+    (if (not (display-images-p))
+        (progn
+          (setq-local org-bars-mode nil)
+          (message "org-bars-mode not turned on; your display can't display images."))
+      (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
+      (advice-add 'text-scale-increase :after 'org-bars-indent)
+      (advice-add 'org-indent-set-line-properties :override
+                  'org-bars-set-line-properties)
+      (advice-add 'org-indent--compute-prefixes :override
+                  'org-bars-compute-prefixes)
+      (advice-add 'org-get-level-face :override
+                  'org-bars-get-level-face)
+      (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
+      (add-to-invisibility-spec '(org-bars-invisible))
+      (org-indent-mode -1)
+      (org-indent-mode 1)))
    (t
     (remove-hook 'post-command-hook 'org-bars-narrow 'local)
     (advice-remove 'text-scale-increase 'org-bars-indent)
