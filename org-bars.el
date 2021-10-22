@@ -328,7 +328,7 @@ This function is meant to override `org-get-level-face' with an advice."
      ((eq n 1)
       (or (= org-l0 1)
           (add-text-properties
-           beg-1 (- end-2 2) '(invisible org-bars-invisible)))
+           beg-1 (- end-2 2) '(invisible org-bars)))
       'default)
      ((eq n 2)
       (let* ((star (org-bars-star))
@@ -540,7 +540,7 @@ This is meant to be used in `post-command-hook'."
       (advice-add 'org-get-level-face :override
                   'org-bars-get-level-face)
       (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
-      (add-to-invisibility-spec '(org-bars-invisible))
+      (add-to-invisibility-spec '(org-bars))
       (org-indent-mode -1)
       (org-indent-mode 1)))
    (t
@@ -554,7 +554,7 @@ This is meant to be used in `post-command-hook'."
                    'org-bars-get-level-face)
     (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
     (org-bars-remove-replacement-stars)
-    (remove-from-invisibility-spec '(org-bars-invisible))
+    (remove-from-invisibility-spec '(org-bars))
     (org-indent-mode -1))))
 
 (global-set-key (kbd "C-<f2>") 'org-bars-mode)
