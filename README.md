@@ -3,6 +3,8 @@
 `org-bars-mode` is a minor mode for `org-mode`.  It adds bars to the
 virtual indentation provided by the built-in package `org-indent`.
 
+![GitHub Logo](./org-bars.png)
+
 # Install
 
 Put [org-bars.el](./org-bars.el) in your load path and add this to
