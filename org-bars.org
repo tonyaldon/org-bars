@@ -1,59 +1,42 @@
-#+TITLE: org-bars
+#+TITLE: org-bars -> github.com/tonyaldon/org-bars
 
-* 1. heading
-** 1.1 heading
-*** 1.1.1 heading
-**** 1.1.1.1 heading
-***** 1.1.1.1.1 heading
-****** 1.1.1.1.1.1 heading
-******* 1.1.1.1.1.1.1 heading
-** 1.2 heading
-*** 1.2.1 heading
-
-Some text.
-
-And a bit more.
-
-*** 1.2.1 heading
-**** 1.2.1.1 heading
+* 1. headline
+** 1.1 headline
+*** 1.1.1 headline
+**** 1.1.1.1 headline
+***** 1.1.1.1.1 headline
+****** 1.1.1.1.1.1 headline
+******* 1.1.1.1.1.1.1 headline
+** 1.2 headline
+** 1.3 headline
 
 Some text.
 
 And a bit more.
 
-***** 1.2.1.1.1 heading
-****** 1.2.1.1.1.1 heading
-******* 1.2.1.1.1.1.1 heading
-*** 1.2.3 heading
-** 1.3 heading
+** 1.4 headline
+*** 1.4.2 headline
 
-Some text.
+~org-bars-mode~ is a minor mode for ~org-mode~.  It
+adds bars to the virtual indentation provided by
+the built-in package ~org-indent~.
 
-And a bit more.
-
-** 1.4 heading
-*** 1.4.2 heading
-
-a super long line to test ~line-wrap~ text property.  a super long line to test ~line-wrap~ text property. a super long line  to test ~line-wrap~ text property.
-
-a super long line to test ~line-wrap~ text property.  a super long line to test ~line-wrap~ text property. a super long line to test ~line-wrap~ text property.
-
-*** 1.4.3 heading
+*** 1.4.3 headline
 
 #+BEGIN_SRC emacs-lisp
-(message "narrowing stuff")
+(message "I hope you like it!")
 #+END_SRC
 
-** 1.5 heading
-* 2. heading
-** 2.1 heading
+** 1.5 headline
+* 2. headline
+** 2.1 headline
 **************** inline task
 
 an inline task with END line
 
 **************** END
-* 3. heading
-* 4. heading
+* 3. headline
+* 4. headline
 
 Some text.
 
