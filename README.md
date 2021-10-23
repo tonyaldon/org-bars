@@ -120,4 +120,11 @@ everything is ok.
    in the `line-prefix` and `wrap-prefix` text properties of the
    buffer, **this won't work correctly**, and the bars might not be
    continuous.
-3. `org-inlinetask` seems to work but has not yet been covered properly.
+3. You can't use both `org-bars-mode` and `org-bullets-mode` at the
+   same time.
+4. If you use `org-bars-mode` and `org-superstar-mode` at the same
+   time, `org-bars-star` stars won't be applied to the headlines.  Only
+   the stars defined by `org-superstar-mode` will be taken into
+   account by `emacs`.  But you'll get the bars in the virtual
+   indentation.
+5. `org-inlinetask` seems to work but has not yet been covered properly.
