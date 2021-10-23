@@ -3,6 +3,7 @@
 ;; Copyright (C) 2021 Tony Aldon
 
 ;; Author: Tony Aldon <tony.aldon.adm@gmail.com>
+;; Version: 0.1
 ;; Package-Requires: ((emacs "27.1") (dash "2.17.0") (s "1.12.0"))
 ;; Keywords: outlines
 ;; Homepage: https://github.com/tonyaldon/org-bars
