@@ -372,9 +372,10 @@ This function is meant to override `org-get-level-face' with an advice."
      (t (unless org-level-color-stars-only org-f)))))
 
 (defun org-bars-refresh-stars (_state)
-  "Refontify all visible heading stars each time `org-cycle' command is used.
+  "Refontify all visible heading stars.
 
-This function is meant to be added to `org-cycle-hook'."
+_STATE is a dummy variable that is not used but mandatory because
+`org-bars-refresh-stars' is meant to be added to `org-cycle-hook'."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward org-outline-regexp nil t)
