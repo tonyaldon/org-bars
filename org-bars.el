@@ -257,6 +257,12 @@ LEVEL must be strickly superior to 0."
 
 ;;; manage stars and headlines faces
 
+(defvar org-bars-with-dynamic-stars-p t
+  "When t, heading stars are dynamicaly replaced by `org-bars-star'.
+
+When nil, heading stars uses the standard \"*\" and are not updated
+when the visibility of the buffer changes.")
+
 (defface org-bars-star-empty nil
   "If non trivial, this is the face used for the heading star
 when corresponding subtree is empty.  If trivial, faces in
@@ -364,11 +370,13 @@ This function is meant to override `org-get-level-face' with an advice."
            beg-1 (- end-2 2) '(invisible org-bars)))
       'default)
      ((eq n 2)
-      (let* ((star (org-bars-star))
-             (star-s (plist-get star :star))
-             (star-f (plist-get star :face)))
-        (compose-region beg-2 (1- end-2) star-s)
-        (if (face-nontrivial-p star-f) star-f org-f)))
+      (if org-bars-with-dynamic-stars-p
+          (let* ((star (org-bars-star))
+                 (star-s (plist-get star :star))
+                 (star-f (plist-get star :face)))
+            (compose-region beg-2 (1- end-2) star-s)
+            (if (face-nontrivial-p star-f) star-f org-f))
+        org-f))
      (t (unless org-level-color-stars-only org-f)))))
 
 (defun org-bars-refresh-stars (_state)
@@ -589,9 +597,10 @@ This is meant to be used in `post-command-hook'."
                   'org-bars-compute-prefixes)
       (advice-add 'org-get-level-face :override
                   'org-bars-get-level-face)
-      (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
-      (add-hook 'after-change-functions
-                'org-bars-refresh-stars-after-change-function nil t)
+      (when org-bars-with-dynamic-stars-p
+        (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
+        (add-hook 'after-change-functions
+                  'org-bars-refresh-stars-after-change-function nil t))
       (add-to-invisibility-spec '(org-bars))
       (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
       (org-indent-mode -1)
@@ -605,10 +614,11 @@ This is meant to be used in `post-command-hook'."
                    'org-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
                    'org-bars-get-level-face)
-    (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
-    (remove-hook 'after-change-functions
-                 'org-bars-refresh-stars-after-change-function t)
-    (org-bars-revert-heading-stars)
+    (when org-bars-with-dynamic-stars-p
+      (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
+      (remove-hook 'after-change-functions
+                   'org-bars-refresh-stars-after-change-function t)
+      (org-bars-revert-heading-stars))
     (remove-from-invisibility-spec '(org-bars))
     (org-indent-mode -1)
     (if org-bars-org-indent-mode (org-indent-mode 1)))))
