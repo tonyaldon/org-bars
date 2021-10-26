@@ -570,11 +570,11 @@ This is meant to be used in `post-command-hook'."
       (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
       (advice-add 'text-scale-increase :after 'org-bars-indent)
       (advice-add 'org-indent-set-line-properties :override
-                   'org-bars-set-line-properties)
+                  'org-bars-set-line-properties)
       (advice-add 'org-indent--compute-prefixes :override
-                   'org-bars-compute-prefixes)
+                  'org-bars-compute-prefixes)
       (advice-add 'org-get-level-face :override
-                   'org-bars-get-level-face)
+                  'org-bars-get-level-face)
       (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
       (add-to-invisibility-spec '(org-bars))
       (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
@@ -584,11 +584,11 @@ This is meant to be used in `post-command-hook'."
     (remove-hook 'post-command-hook 'org-bars-narrow 'local)
     (advice-remove 'text-scale-increase 'org-bars-indent)
     (advice-remove 'org-indent-set-line-properties
-                    'org-bars-set-line-properties)
+                   'org-bars-set-line-properties)
     (advice-remove 'org-indent--compute-prefixes
-                    'org-bars-compute-prefixes)
+                   'org-bars-compute-prefixes)
     (advice-remove 'org-get-level-face
-                    'org-bars-get-level-face)
+                   'org-bars-get-level-face)
     (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
     (org-bars-revert-heading-stars)
     (remove-from-invisibility-spec '(org-bars))
