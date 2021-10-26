@@ -391,8 +391,8 @@ This function is meant to be added to `org-cycle-hook'."
 
 ;;; compute prefixes text properties
 
-(defvar org-bars-extra-pixels-height 6
-  "Extra vertical pixel added to get continuous bars.
+(defvar org-bars-extra-pixels-height 0
+  "Extra vertical pixel added headlines bars to get continuous bars.
 
 If you don't use different font heights for headlines and
 regular text, you can set `org-bars-extra-pixels-height' to 0.
