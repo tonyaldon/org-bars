@@ -93,11 +93,44 @@ See `buffer-invisibility-spec'."
 ps: note that you can't remove the ellipsis by setting `org-ellipsis`
 variable to the empty string `""`.
 
-If the bars are not continuous, try to increment the variable
-`org-bars-extra-pixels-height`.  The default value is `6`.
+## If you use differents font size for headlines
 
-If you don't use different font heights for headlines and
-regular text, you can set `org-bars-extra-pixels-height` to `0`.
+If the font size of the headlines faces (`org-level-1`, ...,
+`org-level-8`) are differents from the default font size, the bars
+might not be continuous.
+
+If headlines faces are set with `face-remap-add-relative`, `org-bars`
+offers no solution (see: [limitations](#limitations)).
+
+If headlines faces are defined by your theme or with
+`custom-set-faces`, you can use the variable
+`org-bars-extra-pixels-height` to fill the gaps between headlines and
+regular lines.
+
+For instance, you can set `org-bars-extra-pixels-height` to `6` like
+this:
+
+```elisp
+(setq org-bars-extra-pixels-height 6)
+```
+
+This will make the bars on headlines `6` pixels taller.  It seems to
+fill the gaps.
+
+The drawback is that this also increases the line height of all
+the headlines but not those of the level 1 that have no added bars.
+
+This is far for being a perfect solution.  But so far, I don't know
+how to do it better.
+
+The default value of `org-bars-extra-pixels-height` is `0` (modified
+at commit: `762f6bb`).
+
+## If your value of line-spacing is non-nil
+
+If your value of `line-spacing` is non-nil, the bars won't be
+continuous.  `org-bars` offers no solution for this case (see:
+[limitations](#limitations)).
 
 # org-bars and company-mode
 
