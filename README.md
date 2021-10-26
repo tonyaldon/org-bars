@@ -111,20 +111,29 @@ and this makes the text in the company tooltip not aligned.
 `company-posframe` uses child frame as tooltip (and not overlay)
 everything is ok.
 
-# limitations
+# Limitations
 
 1. `org-bars-mode` doesn't work on display that can't display images.
-2. If you use `face-remap-add-relative` to set the faces of the
+2. If your value of `line-spacing` is non-nil, the bars won't be
+   continuous.  You'll have a gap of `line-spacing` pixels between
+   each bar.  In `org-bars`, the bars are added modifying the text
+   properties `line-prefix` and `wrap-prefix` on the lines of the
+   buffer.  But `org-bars` doesn't touch the additional space
+   (controled by `line-spacing`) put between lines when displaying
+   buffer.  And I don't know how to modify/customize this space.
+   Please let me know if you know how to "control" this extra
+   space.
+3. If you use `face-remap-add-relative` to set the faces of the
    headlines (`org-level-1`, ..., `org-level-8`), due to how the
    height of those faces is calculated to produce the XPM images put
    in the `line-prefix` and `wrap-prefix` text properties of the
    buffer, **this won't work correctly**, and the bars might not be
    continuous.
-3. You can't use both `org-bars-mode` and `org-bullets-mode` at the
+4. You can't use both `org-bars-mode` and `org-bullets-mode` at the
    same time.
-4. If you use `org-bars-mode` and `org-superstar-mode` at the same
+5. If you use `org-bars-mode` and `org-superstar-mode` at the same
    time, `org-bars-star` stars won't be applied to the headlines.  Only
    the stars defined by `org-superstar-mode` will be taken into
    account by `emacs`.  But you'll get the bars in the virtual
    indentation.
-5. `org-inlinetask` seems to work but has not yet been covered properly.
+6. `org-inlinetask` seems to work but has not yet been covered properly.
