@@ -382,6 +382,19 @@ This function is meant to be added to `org-cycle-hook'."
         (unless (car (get-char-property-and-overlay (point) 'invisible))
           (put-text-property (point-at-bol) (point-at-eol) 'fontified nil))))))
 
+(defun org-bars-refresh-stars-after-change-function (beg end _)
+  "Refontify heading stars on region that has changed.
+
+This function is meant to be added to `after-change-functions'."
+  (save-excursion
+    ;; if `beg' is not on a heading, we must include the heading
+    ;; `beg' belongs to in the refontification.
+    (org-previous-visible-heading 2)
+    (while (re-search-forward org-outline-regexp end t)
+      (with-silent-modifications
+        (unless (car (get-char-property-and-overlay (point) 'invisible))
+          (put-text-property (point-at-bol) (point-at-eol) 'fontified nil))))))
+
 (defun org-bars-revert-heading-stars ()
   "Remove replacement stars `org-bars-stars' on every heading lines."
   (save-excursion
@@ -576,6 +589,8 @@ This is meant to be used in `post-command-hook'."
       (advice-add 'org-get-level-face :override
                   'org-bars-get-level-face)
       (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
+      (add-hook 'after-change-functions
+                'org-bars-refresh-stars-after-change-function nil t)
       (add-to-invisibility-spec '(org-bars))
       (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
       (org-indent-mode -1)
@@ -590,6 +605,8 @@ This is meant to be used in `post-command-hook'."
     (advice-remove 'org-get-level-face
                    'org-bars-get-level-face)
     (remove-hook 'org-cycle-hook 'org-bars-refresh-stars t)
+    (remove-hook 'after-change-functions
+                 'org-bars-refresh-stars-after-change-function t)
     (org-bars-revert-heading-stars)
     (remove-from-invisibility-spec '(org-bars))
     (org-indent-mode -1)
