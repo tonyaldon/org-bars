@@ -7,6 +7,9 @@ virtual indentation provided by the built-in package `org-indent`.
 
 # Install
 
+Be sure to read the [limitations](#limitations) before trying
+`org-bars`.
+
 Put [org-bars.el](./org-bars.el) in your load path and add this to
 your init file:
 
