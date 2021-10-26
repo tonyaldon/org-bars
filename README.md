@@ -53,6 +53,13 @@ inherit the headline color) by setting the properties
                                :darken-level-faces 15))
 ```
 
+## Dynamic stars
+
+If `org-bars-with-dynamic-stars-p` is set to `t` (which is the
+default value) the heading stars are dynamicaly replaced by the
+stars defined in `org-bars-stars` depending on the state of the
+subtree.
+
 The default heading stars are `◉` for empty headlines (`:empty`), `▶`
 for folded headlines (`:invisible`) and `▼` for open headlines
 (`:visible`).
@@ -77,11 +84,29 @@ faces, you can do it by setting the faces `org-bars-star-empty`,
  '(org-bars-star-visible ((t (:foreground "#8c8c8c")))))
 ```
 
+If you use other commands than `org-cycle` to modify the visibility of
+the org tree, the stars won't be refreshed automatically.  To make
+those commands refreshed the stars, you can advise them with
+the function `org-bars-refresh-stars`.
+
+If you are a user of `org-superstar` or `org-bullets` and you prefer
+to keep using one of those packages over the dynamic stars of
+`org-bars`, **this is possible**.
+
+You just have to set `org-bars-with-dynamic-stars-p` to `nil` like this:
+
+```elisp
+(setq org-bars-with-dynamic-stars-p nil)
+```
+
+## Remove ellipsis
+
 This is not specific to `org-bars-mode`, but since `org-bars-mode`
-update the heading stars when the visibility changes (see:
-`org-bars-refresh-stars` function), you might want to not use the
-ellipsis `...` at the end of the folded headlines.  You can do this
-by adding this code snippet to your init file:
+update the heading stars when the visibility changes (if
+`org-bars-with-dynamic-stars-p` is set to `t`), you might want to not
+use the ellipsis `...` at the end of the folded headlines.
+
+You can do this by adding this code snippet to your init file:
 
 ```elisp
 (defun org-no-ellipsis-in-headlines ()
@@ -165,11 +190,4 @@ everything is ok.
    in the `line-prefix` and `wrap-prefix` text properties of the
    buffer, **this won't work correctly**, and the bars might not be
    continuous.
-4. You can't use both `org-bars-mode` and `org-bullets-mode` at the
-   same time.
-5. If you use `org-bars-mode` and `org-superstar-mode` at the same
-   time, `org-bars-star` stars won't be applied to the headlines.  Only
-   the stars defined by `org-superstar-mode` will be taken into
-   account by `emacs`.  But you'll get the bars in the virtual
-   indentation.
-6. `org-inlinetask` seems to work but has not yet been covered properly.
+4. `org-inlinetask` seems to work but has not yet been covered properly.
