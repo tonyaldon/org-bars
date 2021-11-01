@@ -395,14 +395,15 @@ _STATE is a dummy variable that is not used but mandatory because
   "Refontify heading stars on region that has changed.
 
 This function is meant to be added to `after-change-functions'."
-  (save-excursion
-    ;; if `beg' is not on a heading, we must include the heading
-    ;; `beg' belongs to in the refontification.
-    (org-previous-visible-heading 2)
-    (while (re-search-forward org-outline-regexp end t)
-      (with-silent-modifications
-        (unless (car (get-char-property-and-overlay (point) 'invisible))
-          (put-text-property (point-at-bol) (point-at-eol) 'fontified nil))))))
+  (save-match-data
+    (save-excursion
+      ;; if `beg' is not on a heading, we must include the heading
+      ;; `beg' belongs to in the refontification.
+      (org-previous-visible-heading 2)
+      (while (re-search-forward org-outline-regexp end t)
+        (with-silent-modifications
+          (unless (car (get-char-property-and-overlay (point) 'invisible))
+            (put-text-property (point-at-bol) (point-at-eol) 'fontified nil)))))))
 
 (defun org-bars-revert-heading-stars ()
   "Remove replacement stars `org-bars-stars' on every heading lines."
