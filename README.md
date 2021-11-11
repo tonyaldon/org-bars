@@ -101,6 +101,9 @@ You just have to set `org-bars-with-dynamic-stars-p` to `nil` like this:
 
 ## Remove ellipsis
 
+The tweak proposed here has the disadvantage to make `org-cycle`
+not work correctly on items list (see: [issue #5](https://github.com/tonyaldon/org-bars/issues/5)).
+
 This is not specific to `org-bars-mode`, but since `org-bars-mode`
 update the heading stars when the visibility changes (if
 `org-bars-with-dynamic-stars-p` is set to `t`), you might want to not
