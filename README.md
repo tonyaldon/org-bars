@@ -10,12 +10,23 @@ virtual indentation provided by the built-in package `org-indent`.
 Be sure to read the [limitations](#limitations) before trying
 `org-bars`.
 
+## Manual Installation
+
 Put [org-bars.el](./org-bars.el) in your load path and add this to
 your init file:
 
 ```elisp
 (require 'org-bars)
 (add-hook 'org-mode-hook #'org-bars-mode)
+```
+
+## `straight.el` Installation
+
+Add this to your init file:
+
+```elisp
+(use-package org-bars
+  :straight (org-bars :type git :host github :repo "tonyaldon/org-bars"))
 ```
 
 # Options
