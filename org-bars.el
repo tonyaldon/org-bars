@@ -581,6 +581,7 @@ This is meant to be used in `post-command-hook'."
 (defvar-local org-bars-org-indent-mode nil
   "Hold the value of `org-indent-mode' before turning `org-bars-mode' on.")
 
+;;;###autoload
 (define-minor-mode org-bars-mode
   "Toggle `org-bars-mode' mode on or off."
   :global nil
