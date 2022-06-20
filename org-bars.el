@@ -427,7 +427,7 @@ See `org-bars-face-height', `org-bars-cycle-level-line-height' and
   "Return height in pixel of the face FACE.
 This function takes care of the cases where the text has
 been scaled up or down with `text-scale-increase' or `text-scale-decrease'."
-  (let* ((face-font-height (if-let ((font (face-font face)))
+  (let* ((face-font-height (if-let ((font (and (fboundp 'font-info) (face-font face))))
                                (aref (font-info font) 3)
                              0))
          (height-not-an-integer-p
