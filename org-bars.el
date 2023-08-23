@@ -4,7 +4,6 @@
 
 ;; Author: Tony Aldon <tony.aldon.adm@gmail.com>
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (dash "2.17.0") (s "1.12.0"))
 ;; Keywords: outlines
 ;; Homepage: https://github.com/tonyaldon/org-bars
 
@@ -427,7 +426,9 @@ See `org-bars-face-height', `org-bars-cycle-level-line-height' and
   "Return height in pixel of the face FACE.
 This function takes care of the cases where the text has
 been scaled up or down with `text-scale-increase' or `text-scale-decrease'."
-  (let* ((face-font-height (aref (font-info (face-font face)) 3))
+  (let* ((face-font-height (if-let ((font (and (fboundp 'font-info) (face-font face))))
+                               (aref (font-info font) 3)
+                             0))
          (height-not-an-integer-p
           (not (integerp (face-attribute face :height nil t))))
          (scale (nth 2 (assq 'default text-scale-mode-remapping)))
@@ -458,6 +459,23 @@ ORG-OPTIONS is a plist:
         (org-bars-face-height (nth (% (1- level) n-faces) faces) extra-pixel)
       (org-bars-face-height (nth (1- (min level n-faces)) faces) extra-pixel))))
 
+(defun org-bars-function-character (level &optional width height color-options org-options)
+  "Generate bars using specific character."
+  (ignore width height color-options org-options)
+  (apply #'concat
+         (mapcar (lambda (level)
+                   (propertize "│ " 'face (cons 'foreground-color (face-attribute (intern (format "org-level-%d" (1+ (% (1- level) 8)))) :foreground))))
+                 (number-sequence 1 level))))
+
+(defun org-bars-function-xpm (level width height color-options org-options)
+  "Generate bars using XPM."
+  (propertize
+   " " 'display (org-bars-xpm-image
+                 level width height
+                 color-options org-options)))
+
+(defconst org-bars-function (if (display-images-p) #'org-bars-function-xpm #'org-bars-function-character))
+
 (defun org-bars-compute-prefixes ()
   "Compute prefix strings for regular text and headlines.
 
@@ -476,9 +494,9 @@ with an advice."
          (height (default-line-height))
          (color-options org-bars-color-options)
          (org-options `(:org-indent-indentation-per-level ,org-indent-indentation-per-level
-                        :org-cycle-level-faces ,org-cycle-level-faces
-                        :org-n-level-faces ,org-n-level-faces
-                        :org-level-faces ,org-level-faces)))
+                                                          :org-cycle-level-faces ,org-cycle-level-faces
+                                                          :org-n-level-faces ,org-n-level-faces
+                                                          :org-level-faces ,org-level-faces)))
     (dotimes (n org-indent--deepest-level)
       (let ((indentation (if (<= n 1) 0
                            (* (1- org-indent-indentation-per-level)
@@ -489,14 +507,12 @@ with an advice."
                 n
                 (if (<= n 1)
                     ""
-                  (propertize
-                   " " 'display (org-bars-xpm-image
-                                 (1- n) width
-                                 (org-bars-cycle-level-line-height
-                                  n
-                                  org-bars-extra-pixels-height
-                                  org-options)
-                                 color-options org-options))))
+                  (funcall org-bars-function (1- n) width
+                           (org-bars-cycle-level-line-height
+                            n
+                            org-bars-extra-pixels-height
+                            org-options)
+                           color-options org-options)))
 
           ;; -------
           ;; BEG: part unchanged from `org-indent--compute-prefixes'
@@ -517,9 +533,8 @@ with an advice."
               n
               (if (= n 0)
                   ""
-                (propertize " " 'display (org-bars-xpm-image
-                                          n width height
-                                          color-options org-options))))))))
+                (funcall org-bars-function n width height
+                         color-options org-options)))))))
 
 (defun org-bars-indent (&rest _r)
   "Indent current buffer with recomputed xpm image prefixes.
@@ -586,26 +601,22 @@ This is meant to be used in `post-command-hook'."
   :global nil
   (cond
    (org-bars-mode
-    (if (not (display-images-p))
-        (progn
-          (setq-local org-bars-mode nil)
-          (message "org-bars-mode not turned on; your display can't display images."))
-      (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
-      (advice-add 'text-scale-increase :after 'org-bars-indent)
-      (advice-add 'org-indent-set-line-properties :override
-                  'org-bars-set-line-properties)
-      (advice-add 'org-indent--compute-prefixes :override
-                  'org-bars-compute-prefixes)
-      (advice-add 'org-get-level-face :override
-                  'org-bars-get-level-face)
-      (when org-bars-with-dynamic-stars-p
-        (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
-        (add-hook 'after-change-functions
-                  'org-bars-refresh-stars-after-change-function nil t))
-      (add-to-invisibility-spec '(org-bars))
-      (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
-      (org-indent-mode -1)
-      (org-indent-mode 1)))
+    (add-hook 'post-command-hook 'org-bars-narrow nil 'local)
+    (advice-add 'text-scale-increase :after 'org-bars-indent)
+    (advice-add 'org-indent-set-line-properties :override
+                'org-bars-set-line-properties)
+    (advice-add 'org-indent--compute-prefixes :override
+                'org-bars-compute-prefixes)
+    (advice-add 'org-get-level-face :override
+                'org-bars-get-level-face)
+    (when org-bars-with-dynamic-stars-p
+      (add-hook 'org-cycle-hook 'org-bars-refresh-stars nil t)
+      (add-hook 'after-change-functions
+                'org-bars-refresh-stars-after-change-function nil t))
+    (add-to-invisibility-spec '(org-bars))
+    (setq-local org-bars-org-indent-mode (bound-and-true-p org-indent-mode))
+    (org-indent-mode -1)
+    (org-indent-mode 1))
    (t
     (remove-hook 'post-command-hook 'org-bars-narrow 'local)
     (advice-remove 'text-scale-increase 'org-bars-indent)
